@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm install && pnpm run build",
+  "buildCommand": "pnpm install && cd api-server && node build.mjs && cd ../frontend && pnpm run build",
   "outputDirectory": "frontend/dist/public",
   "functions": {
     "api/server.mjs": { "maxDuration": 30 }
