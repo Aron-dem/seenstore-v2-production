@@ -12,7 +12,7 @@ const CLIENT_ID     = process.env["GOOGLE_CLIENT_ID"]     ?? "";
 const CLIENT_SECRET = process.env["GOOGLE_CLIENT_SECRET"] ?? "";
 const REDIRECT_URI  = process.env["GOOGLE_REDIRECT_URI"]  ?? "";
 
-const ADMIN_EMAILS = (process.env["ADMIN_EMAILS"] ?? "seifabdelrahman858@gmail.com")
+const ADMIN_EMAILS = (process.env["ADMIN_EMAILS"] ?? "seifabdelrahman858@gmail.com,seenstore329@gmail.com")
   .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
 const CODE_TTL_MS  = 5 * 60 * 1000; // 5 minutes

@@ -150,7 +150,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS coupons_code_idx ON public.coupons(code);
 -- ─── Admin Account ──────────────────────────────────────────────────
 -- ⚠️  Change the email below to your actual admin email before running!
 INSERT INTO public.users (id, email, name, role)
-VALUES (gen_random_uuid()::text, 'seifabdelrahman858@gmail.com', 'Seif Admin', 'admin')
+VALUES 
+  (gen_random_uuid()::text, 'seifabdelrahman858@gmail.com', 'Seif Admin', 'admin'),
+  (gen_random_uuid()::text, 'seenstore329@gmail.com', 'SeenStore Admin', 'admin')
 ON CONFLICT (email) DO UPDATE SET role = 'admin', updated_at = now();
 
 
