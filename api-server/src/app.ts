@@ -1,9 +1,11 @@
 import express, { type Express } from "express";
 import cors from "cors";
-import helmet from "helmet";
+import * as helmetModule from "helmet";
+const helmet = (helmetModule as any).default || helmetModule;
 import compression from "compression";
 import { rateLimit } from "express-rate-limit";
-import pinoHttp from "pino-http";
+import * as pinoHttpModule from "pino-http";
+const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import router from "./routes";
 import { logger } from "./lib/logger";
 
