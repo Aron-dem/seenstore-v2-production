@@ -183,3 +183,16 @@ export const couponsTable = pgTable("coupons", {
 ]);
 
 export type Coupon = typeof couponsTable.$inferSelect;
+
+// ─── OAuth Temporary Storage (For Serverless Compatibility) ──────────────────
+export const oauthStatesTable = pgTable("oauth_states", {
+  state:     text("state").primaryKey(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const oauthCodesTable = pgTable("oauth_codes", {
+  code:         text("code").primaryKey(),
+  accessToken:  text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt:    timestamp("expires_at").notNull(),
+});

@@ -12,6 +12,8 @@ export {
   contactMessagesTable,
   wishlistItemsTable,
   couponsTable,
+  oauthStatesTable,
+  oauthCodesTable,
 } from "../../../api-server/src/db/schema.js";
 
 export type {

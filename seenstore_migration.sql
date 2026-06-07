@@ -153,3 +153,16 @@ INSERT INTO public.users (id, email, name, role)
 VALUES (gen_random_uuid()::text, 'seifabdelrahman858@gmail.com', 'Seif Admin', 'admin')
 ON CONFLICT (email) DO UPDATE SET role = 'admin', updated_at = now();
 
+
+-- ─── OAuth Temporary Storage (For Serverless Compatibility) ──────────
+CREATE TABLE IF NOT EXISTS public.oauth_states (
+  state      text PRIMARY KEY,
+  expires_at timestamptz NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.oauth_codes (
+  code          text PRIMARY KEY,
+  access_token  text NOT NULL,
+  refresh_token text NOT NULL,
+  expires_at    timestamp NOT NULL
+);

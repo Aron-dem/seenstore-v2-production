@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
 import crypto from "crypto";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { usersTable, refreshTokensTable } from "@workspace/db/schema";
+import { usersTable, refreshTokensTable, oauthStatesTable, oauthCodesTable } from "@workspace/db/schema";
 import { signAccessToken, signRefreshToken } from "../lib/jwt.js";
 
 const router: IRouter = Router();
@@ -15,30 +15,19 @@ const REDIRECT_URI  = process.env["GOOGLE_REDIRECT_URI"]  ?? "";
 const ADMIN_EMAILS = (process.env["ADMIN_EMAILS"] ?? "seifabdelrahman858@gmail.com")
   .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
 
-// ─── One-Time Auth Code Store ─────────────────────────────────────────────────
-// Tokens are NEVER passed in URL query params (visible in browser history, logs,
-// referrer headers). Instead we issue a short-lived one-time code that the
-// frontend exchanges once via POST /api/auth/google/exchange.
-type OAuthSession = {
-  accessToken:  string;
-  refreshToken: string;
-  expiresAt:    number; // unix ms
-};
-
-const pendingCodes = new Map<string, OAuthSession>();
 const CODE_TTL_MS  = 5 * 60 * 1000; // 5 minutes
+const STATE_TTL_MS  = 10 * 60 * 1000; // 10 minutes
 
-// Clean up expired codes every 10 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [code, session] of pendingCodes) {
-    if (session.expiresAt < now) pendingCodes.delete(code);
-  }
-}, 10 * 60 * 1000);
+// ─── DB-backed Session Helpers ───────────────────────────────────────────────
 
-function issueOneTimeCode(session: Omit<OAuthSession, "expiresAt">): string {
+async function issueOneTimeCode(session: { accessToken: string; refreshToken: string }): Promise<string> {
   const code = crypto.randomBytes(32).toString("hex");
-  pendingCodes.set(code, { ...session, expiresAt: Date.now() + CODE_TTL_MS });
+  await db.insert(oauthCodesTable).values({
+    code,
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
+    expiresAt: new Date(Date.now() + CODE_TTL_MS)
+  });
   return code;
 }
 
@@ -56,20 +45,10 @@ function getGoogleOAuthUrl(state: string) {
   return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
 }
 
-// ─── In-memory CSRF state store ───────────────────────────────────────────────
-// state param prevents CSRF in the OAuth flow
-const pendingStates = new Map<string, number>(); // state -> expiresAt ms
-const STATE_TTL_MS  = 10 * 60 * 1000; // 10 minutes
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [s, exp] of pendingStates) {
-    if (exp < now) pendingStates.delete(s);
-  }
-}, 10 * 60 * 1000);
+// ─── Routes ───────────────────────────────────────────────────────────────────
 
 // GET /api/auth/google  — initiate OAuth flow
-router.get("/auth/google", (_req, res) => {
+router.get("/auth/google", async (_req, res) => {
   if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI) {
     res.status(503).json({
       error: "Google OAuth not configured. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI.",
@@ -78,7 +57,12 @@ router.get("/auth/google", (_req, res) => {
   }
 
   const state = crypto.randomBytes(16).toString("hex");
-  pendingStates.set(state, Date.now() + STATE_TTL_MS);
+  // Store state in DB for serverless compatibility
+  await db.insert(oauthStatesTable).values({
+    state,
+    expiresAt: new Date(Date.now() + STATE_TTL_MS)
+  });
+  
   res.redirect(getGoogleOAuthUrl(state));
 });
 
@@ -91,12 +75,18 @@ router.get("/auth/google/callback", async (req, res) => {
   const frontendBase = process.env["FRONTEND_URL"] ?? "";
   const failUrl      = `${frontendBase}/auth?error=google_failed`;
 
-  // Validate CSRF state
-  if (!state || !pendingStates.has(state) || (pendingStates.get(state)! < Date.now())) {
+  if (!state) { res.redirect(failUrl); return; }
+
+  // Validate CSRF state from DB
+  const [dbState] = await db.select().from(oauthStatesTable).where(eq(oauthStatesTable.state, state)).limit(1);
+  
+  if (!dbState || dbState.expiresAt < new Date()) {
     res.redirect(failUrl);
     return;
   }
-  pendingStates.delete(state); // consume immediately
+  
+  // Consume state immediately
+  await db.delete(oauthStatesTable).where(eq(oauthStatesTable.state, state));
 
   if (error || !code) {
     res.redirect(failUrl);
@@ -173,10 +163,8 @@ router.get("/auth/google/callback", async (req, res) => {
     const { token: refreshToken, hash, expiresAt } = signRefreshToken(finalUser.id);
     await db.insert(refreshTokensTable).values({ userId: finalUser.id, tokenHash: hash, expiresAt });
 
-    // ── Issue a one-time exchange code instead of tokens in URL ──────────────
-    // Tokens NEVER appear in the redirect URL — they stay on the server until
-    // the frontend calls POST /api/auth/google/exchange to pick them up.
-    const onetimeCode = issueOneTimeCode({ accessToken, refreshToken });
+    // ── Issue a one-time exchange code stored in DB ──────────────
+    const onetimeCode = await issueOneTimeCode({ accessToken, refreshToken });
     res.redirect(`${frontendBase}/auth/callback?code=${onetimeCode}`);
 
   } catch (err) {
@@ -186,8 +174,7 @@ router.get("/auth/google/callback", async (req, res) => {
 });
 
 // POST /api/auth/google/exchange  — frontend exchanges one-time code for tokens
-// The code is valid for 5 minutes and can only be used once.
-router.post("/auth/google/exchange", (req, res) => {
+router.post("/auth/google/exchange", async (req, res) => {
   const { code } = req.body as { code?: string };
 
   if (!code || typeof code !== "string") {
@@ -195,26 +182,35 @@ router.post("/auth/google/exchange", (req, res) => {
     return;
   }
 
-  const session = pendingCodes.get(code);
+  // Find code in DB
+  const [session] = await db.select().from(oauthCodesTable).where(eq(oauthCodesTable.code, code)).limit(1);
 
   if (!session) {
     res.status(401).json({ error: "Invalid or expired code" });
     return;
   }
 
-  if (session.expiresAt < Date.now()) {
-    pendingCodes.delete(code);
+  if (session.expiresAt < new Date()) {
+    await db.delete(oauthCodesTable).where(eq(oauthCodesTable.code, code));
     res.status(401).json({ error: "Code expired" });
     return;
   }
 
-  // One-time use — delete immediately
-  pendingCodes.delete(code);
+  // One-time use — delete immediately from DB
+  await db.delete(oauthCodesTable).where(eq(oauthCodesTable.code, code));
 
   res.json({
     accessToken:  session.accessToken,
     refreshToken: session.refreshToken,
   });
+});
+
+// Cleanup route (optional, can be called by a cron job)
+router.delete("/auth/cleanup", async (_req, res) => {
+  const now = new Date();
+  await db.delete(oauthStatesTable).where(lt(oauthStatesTable.expiresAt, now));
+  await db.delete(oauthCodesTable).where(lt(oauthCodesTable.expiresAt, now));
+  res.json({ success: true });
 });
 
 export default router;
