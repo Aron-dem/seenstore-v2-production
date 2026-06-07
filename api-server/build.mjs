@@ -8,7 +8,7 @@ import { rm, mkdir } from "node:fs/promises";
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
-const rootDir     = path.resolve(artifactDir, "..", "..");
+const rootDir     = path.resolve(artifactDir, "..");
 
 const EXTERNALS = [
   "*.node",

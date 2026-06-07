@@ -25,7 +25,12 @@ router.post("/custom-orders", optionalAuth, async (req, res) => {
   }
 
   const [order] = await db.insert(customOrdersTable).values({
-    ...parsed.data,
+    customerName: parsed.data.customerName,
+    customerEmail: parsed.data.customerEmail,
+    itemType: parsed.data.itemType,
+    size: parsed.data.size,
+    color: parsed.data.color,
+    details: parsed.data.details,
     userId: req.user?.sub ?? null,
     designUrl: parsed.data.designUrl ?? null,
   }).returning();
