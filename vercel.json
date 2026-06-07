@@ -1,13 +1,14 @@
 {
   "version": 2,
-  "buildCommand": "pnpm install && cd api-server && pnpm run build && cd ../frontend && pnpm run build",
-  "outputDirectory": "frontend/dist/public",
+  "buildCommand": "pnpm install && pnpm run build",
+  "outputDirectory": ".",
   "functions": {
     "api/server.mjs": { "maxDuration": 30 }
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/server.mjs" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/assets/(.*)", "destination": "/frontend/dist/public/assets/$1" },
+    { "source": "/((?!api/).*)", "destination": "/frontend/dist/public/index.html" }
   ],
   "headers": [
     {
