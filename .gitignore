@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.*
+.DS_Store
+*.log
+.vercel
+.cache
+frontend/dist
+api-server/dist
+api/server.mjs
