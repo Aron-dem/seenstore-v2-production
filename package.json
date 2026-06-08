@@ -4,5 +4,8 @@
   "version": "0.0.0",
   "scripts": {
     "build": "pnpm --filter \"*\" run build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
