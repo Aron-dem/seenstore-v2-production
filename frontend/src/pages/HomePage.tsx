@@ -359,20 +359,6 @@ export default function HomePage() {
       {/* FAQ */}
       <FaqSection isRTL={isRTL} />
 
-      {/* Newsletter */}
-      <section className="py-24 bg-black text-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E63946]/20 blur-[120px] rounded-full pointer-events-none" />
-        <div className="container relative z-10 mx-auto px-6 max-w-4xl text-center">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <h2 className="font-heading text-4xl md:text-6xl font-bold tracking-tight mb-6">{t.home.joinMovement}</h2>
-            <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">{t.home.joinMovementDesc}</p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder={t.home.emailPlaceholder} required className="flex-1 bg-white/5 border border-white/20 text-white placeholder-gray-500 px-6 py-4 rounded-lg focus:outline-none focus:border-[#E63946] focus:ring-1 focus:ring-[#E63946] transition-all" />
-              <button type="submit" className="bg-[#E63946] text-white font-bold px-8 py-4 rounded-lg hover:bg-white hover:text-black transition-colors whitespace-nowrap">{t.home.subscribe}</button>
-            </form>
-          </motion.div>
-        </div>
-      </section>
     </>
   );
 }
