@@ -7,7 +7,7 @@ import { ShoppingBag, Heart, Filter, Grid, List, X, Check, Loader2 } from "lucid
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 
-const CATEGORIES = ["T-Shirts", "Pants", "Hoodies", "Accessories"];
+const CATEGORIES = ["T-Shirts", "Pants", "Hoodies"];
 const SIZES     = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLORS    = [
   { name: "Black",  hex: "#000000" },

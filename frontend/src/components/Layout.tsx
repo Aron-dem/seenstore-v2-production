@@ -20,8 +20,6 @@ const shopRoutes: Record<string, string> = {
   "هوديز":            "/shop?category=Hoodies",
   "Pants":            "/shop?category=Pants",
   "بناطيل":           "/shop?category=Pants",
-  "Accessories":      "/shop?category=Accessories",
-  "إكسسوارات":        "/shop?category=Accessories",
   "New Arrivals":     "/shop?badge=new",
   "وصل حديثاً":       "/shop?badge=new",
 };

@@ -4,7 +4,7 @@ interface LogoProps {
 }
 
 export default function SeenstoreLogo({ white = false, size = "md" }: LogoProps) {
-  const scales = { sm: 0.7, md: 1, lg: 1.4 };
+  const scales = { sm: 0.9, md: 1.3, lg: 1.7 };
   const s = scales[size];
   const imgH = Math.round(36 * s);
   const accentColor = "#E63946";

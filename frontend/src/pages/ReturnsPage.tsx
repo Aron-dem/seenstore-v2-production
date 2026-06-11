@@ -11,7 +11,7 @@ export default function ReturnsPage() {
         <h1 className="font-heading text-4xl md:text-5xl font-bold mb-4">
           {isAr ? "سياسة الإرجاع" : "Returns Policy"}
         </h1>
-        <p className="text-gray-500">
+        <p className="text-gray-400">
           {isAr ? "نضمن رضاك التام أو نسترد لك المبلغ" : "We guarantee your satisfaction or your money back"}
         </p>
       </div>
@@ -21,37 +21,37 @@ export default function ReturnsPage() {
         <RefreshCcw className="w-16 h-16 flex-shrink-0" />
         <div>
           <h2 className="font-heading text-3xl font-bold mb-2">
-            {isAr ? "30 يوماً لإرجاع المنتج" : "30-Day Return Window"}
+            {isAr ? "14 يوماً لإرجاع المنتج" : "14-Day Return Window"}
           </h2>
           <p className="text-white/90">
             {isAr
-              ? "لديك 30 يوماً كاملاً من تاريخ الاستلام لإرجاع أي منتج غير راضٍ عنه."
-              : "You have a full 30 days from delivery to return any item you're not satisfied with."}
+              ? "لديك 14 يوماً كاملاً من تاريخ الاستلام لإرجاع أي منتج غير راضٍ عنه."
+              : "You have a full 14 days from delivery to return any item you're not satisfied with."}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         {/* Accepted */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-5">
-            <CheckCircle className="w-6 h-6 text-green-500" />
-            <h3 className="font-heading font-bold text-lg">{isAr ? "يُقبل الإرجاع" : "Eligible for Return"}</h3>
+            <CheckCircle className="w-6 h-6 text-green-400" />
+            <h3 className="font-heading font-bold text-lg text-white">{isAr ? "يُقبل الإرجاع" : "Eligible for Return"}</h3>
           </div>
-          <ul className="space-y-3 text-sm text-gray-600">
+          <ul className="space-y-3 text-sm text-gray-300">
             {(isAr ? [
               "منتجات غير مستخدمة وغير مغسولة",
               "منتجات في عبوتها الأصلية مع العلامات",
-              "خلال 30 يوماً من تاريخ الاستلام",
+              "خلال 14 يوماً من تاريخ الاستلام",
               "منتجات معيبة أو تالفة عند الاستلام",
             ] : [
               "Unused and unwashed items",
               "Items in original packaging with tags attached",
-              "Within 30 days of delivery date",
+              "Within 14 days of delivery date",
               "Defective or damaged items upon receipt",
             ]).map((item, i) => (
               <li key={i} className="flex items-start gap-2">
-                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
                 {item}
               </li>
             ))}
@@ -59,21 +59,21 @@ export default function ReturnsPage() {
         </div>
 
         {/* Not Accepted */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-5">
             <XCircle className="w-6 h-6 text-[#E63946]" />
-            <h3 className="font-heading font-bold text-lg">{isAr ? "لا يُقبل الإرجاع" : "Not Eligible"}</h3>
+            <h3 className="font-heading font-bold text-lg text-white">{isAr ? "لا يُقبل الإرجاع" : "Not Eligible"}</h3>
           </div>
-          <ul className="space-y-3 text-sm text-gray-600">
+          <ul className="space-y-3 text-sm text-gray-300">
             {(isAr ? [
               "منتجات مستخدمة أو مغسولة",
               "منتجات بدون علامات أو عبوة أصلية",
-              "بعد مرور أكثر من 30 يوماً",
+              "بعد مرور أكثر من 14 يوماً",
               "منتجات العروض والتخفيضات الخاصة",
             ] : [
               "Used or washed items",
               "Items without tags or original packaging",
-              "After 30 days from delivery",
+              "After 14 days from delivery",
               "Sale or special promotion items",
             ]).map((item, i) => (
               <li key={i} className="flex items-start gap-2">
@@ -86,8 +86,8 @@ export default function ReturnsPage() {
       </div>
 
       {/* Process */}
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8 mb-8">
-        <h2 className="font-heading font-bold text-2xl mb-6">{isAr ? "خطوات الإرجاع" : "How to Return"}</h2>
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-8">
+        <h2 className="font-heading font-bold text-2xl mb-6 text-white">{isAr ? "خطوات الإرجاع" : "How to Return"}</h2>
         <div className="space-y-6">
           {(isAr ? [
             { step: "1", title: "تواصل معنا", desc: "أرسل بريداً إلكترونياً إلى returns@seenstore.com مع رقم طلبك وسبب الإرجاع." },
@@ -105,15 +105,15 @@ export default function ReturnsPage() {
                 {step.step}
               </div>
               <div>
-                <h4 className="font-semibold mb-1">{step.title}</h4>
-                <p className="text-gray-600 text-sm">{step.desc}</p>
+                <h4 className="font-semibold mb-1 text-white">{step.title}</h4>
+                <p className="text-gray-400 text-sm">{step.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
+      <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-gray-400">
         <Clock className="w-5 h-5 text-[#E63946] flex-shrink-0" />
         {isAr
           ? "يتم استرداد المبلغ إلى نفس طريقة الدفع الأصلية خلال 5–7 أيام عمل."

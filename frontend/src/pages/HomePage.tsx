@@ -21,7 +21,6 @@ import heroImg from "../assets/hero.png";
 import catTshirts from "../assets/cat-tshirts.png";
 import catPants from "../assets/cat-pants.png";
 import catHoodies from "../assets/cat-hoodies.png";
-import catAccessories from "../assets/cat-accessories.png";
 
 const faqsEn = [
   { q: "How long does shipping take?",           a: "Standard shipping takes 2–5 business days. Express (1–2 days) is available at checkout." },
@@ -46,16 +45,16 @@ function FaqSection({ isRTL }: { isRTL: boolean }) {
   const faqs = isRTL ? faqsAr : faqsEn;
 
   return (
-    <section id="faq" className="py-24 bg-gray-50" dir={isRTL ? "rtl" : "ltr"}>
+    <section id="faq" className="py-24 bg-black" dir={isRTL ? "rtl" : "ltr"}>
       <div className="container mx-auto px-6 max-w-3xl">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
           <span className="inline-block bg-[#E63946]/10 text-[#E63946] text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest mb-4">
             {isRTL ? "الأسئلة الشائعة" : "FAQ"}
           </span>
-          <h2 className="font-heading text-4xl md:text-5xl font-bold">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-white">
             {isRTL ? "أسئلة مهمة؟" : "Got Questions?"}
           </h2>
-          <p className="text-gray-500 mt-3 text-lg">
+          <p className="text-gray-400 mt-3 text-lg">
             {isRTL ? "كل ما تحتاج معرفته في مكان واحد" : "Everything you need to know, in one place"}
           </p>
         </motion.div>
@@ -64,9 +63,9 @@ function FaqSection({ isRTL }: { isRTL: boolean }) {
             <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <button
                 onClick={() => setOpen(open === i ? null : i)}
-                className={`w-full ${isRTL ? "text-right" : "text-left"} bg-white rounded-xl px-6 py-5 flex items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all border border-gray-100 ${open === i ? "border-[#E63946]/30" : ""}`}
+                className={`w-full ${isRTL ? "text-right" : "text-left"} bg-white/5 rounded-xl px-6 py-5 flex items-center justify-between gap-4 hover:bg-white/10 transition-all border border-white/10 ${open === i ? "border-[#E63946]/40" : ""}`}
               >
-                <span className="font-semibold text-gray-900 text-base">{faq.q}</span>
+                <span className="font-semibold text-white text-base">{faq.q}</span>
                 <ChevronDown className={`w-5 h-5 flex-shrink-0 text-gray-400 transition-transform duration-300 ${open === i ? "rotate-180 text-[#E63946]" : ""}`} />
               </button>
               <AnimatePresence initial={false}>
@@ -78,7 +77,7 @@ function FaqSection({ isRTL }: { isRTL: boolean }) {
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-white px-6 pb-5 text-gray-600 leading-relaxed rounded-b-xl border border-t-0 border-gray-100 border-[#E63946]/10">
+                    <div className="bg-white/5 px-6 pb-5 text-gray-300 leading-relaxed rounded-b-xl border border-t-0 border-white/10">
                       {faq.a}
                     </div>
                   </motion.div>
@@ -117,7 +116,6 @@ export default function HomePage() {
     { id: 1, name: t.categories.tShirts, image: catTshirts, key: "T-Shirts" },
     { id: 2, name: t.categories.pants, image: catPants, key: "Pants" },
     { id: 3, name: t.categories.hoodies, image: catHoodies, key: "Hoodies" },
-    { id: 4, name: t.categories.accessories, image: catAccessories, key: "Accessories" },
   ];
 
   const [featuredProducts, setFeaturedProducts] = useState<ApiProduct[]>([]);
@@ -203,19 +201,19 @@ export default function HomePage() {
       </section>
 
       {/* Categories Section */}
-      <section id="categories" className="py-24 bg-white">
+      <section id="categories" className="py-24 bg-[#0a0a0a]">
         <div className="container mx-auto px-6 md:px-12 max-w-[1400px]">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
             <div>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-black">{t.home.essentials}</h2>
-              <p className="text-gray-500 mt-2">{t.home.essentialsDesc}</p>
+              <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-white">{t.home.essentials}</h2>
+              <p className="text-gray-400 mt-2">{t.home.essentialsDesc}</p>
             </div>
             <Link href="/shop" className="group flex items-center text-sm font-semibold hover:text-[#E63946] transition-colors block">
               {t.home.viewAllCats}
               <ChevronRight className={`w-4 h-4 ${isRTL ? "mr-1 rotate-180" : "ml-1"} group-hover:translate-x-1 transition-transform`} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((cat, idx) => (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.5, delay: idx * 0.1 }}>
                 <Link href={`/shop?category=${cat.key}`} className="group relative h-[400px] rounded-xl overflow-hidden cursor-pointer block">
@@ -248,15 +246,15 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products — Best This Month */}
-      <section className="py-24 bg-[#F5F5F5]">
+      <section className="py-24 bg-[#0a0a0a]">
         <div className="container mx-auto px-6 md:px-12 max-w-[1400px]">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-sm font-bold mb-4">
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-400 px-4 py-2 rounded-full text-sm font-bold mb-4">
               <Flame className="w-4 h-4" />
               {isRTL ? "الأكثر طلباً هذا الشهر" : "Best Orders This Month"}
             </div>
-            <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight text-black mb-4">{t.home.latestDrops}</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">{t.home.latestDropsDesc}</p>
+            <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight text-white mb-4">{t.home.latestDrops}</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">{t.home.latestDropsDesc}</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
@@ -270,9 +268,9 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-all duration-300"
+                  className="group bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300"
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-white/5">
                     {product.badge && (
                       <span className={`absolute top-3 left-3 z-10 text-[10px] font-bold px-2 py-1 rounded text-white ${product.badge === "SALE" ? "bg-[#E63946]" : "bg-black"}`}>
                         {product.badge}
@@ -285,20 +283,20 @@ export default function HomePage() {
                     </Link>
                     <button
                       onClick={() => toggleWishlist(product.id)}
-                      className={`absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md z-10 transition-all hover:scale-110 ${isWishlisted(product.id) ? "text-[#E63946]" : "text-gray-400 hover:text-[#E63946]"}`}
+                      className={`absolute top-3 right-3 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center z-10 transition-all hover:scale-110 ${isWishlisted(product.id) ? "text-[#E63946]" : "text-gray-400 hover:text-[#E63946]"}`}
                     >
                       <Heart className={`w-4 h-4 ${isWishlisted(product.id) ? "fill-[#E63946]" : ""}`} />
                     </button>
                   </div>
                   <div className="p-4 md:p-5">
-                    <h3 className="font-heading font-semibold text-sm md:text-base text-black mb-1 line-clamp-1">{displayName}</h3>
+                    <h3 className="font-heading font-semibold text-sm md:text-base text-white mb-1 line-clamp-1">{displayName}</h3>
                     {product.colors.length > 0 && (
-                      <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300 bg-gray-700" />
+                      <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-600 bg-gray-500" />
                         {product.colors[0]}
                       </p>
                     )}
-                    <p className="font-heading font-bold text-sm md:text-lg text-gray-900">{product.price} EGP</p>
+                    <p className="font-heading font-bold text-sm md:text-lg text-white">{product.price} EGP</p>
                   </div>
                 </motion.div>
               );
@@ -306,7 +304,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-16 flex justify-center">
-            <Link href="/shop" className="border-2 border-black text-black font-semibold px-10 py-4 rounded-lg hover:bg-black hover:text-white transition-colors inline-block text-center">
+            <Link href="/shop" className="border-2 border-white text-white font-semibold px-10 py-4 rounded-lg hover:bg-white hover:text-black transition-colors inline-block text-center">
               {t.home.viewAllProducts}
             </Link>
           </div>
@@ -337,21 +335,21 @@ export default function HomePage() {
       </section>
 
       {/* Why SEENSTORE */}
-      <section id="about" className="py-24 bg-white">
+      <section id="about" className="py-24 bg-black">
         <div className="container mx-auto px-6 max-w-[1400px]">
           <div className="flex items-center justify-center gap-4 mb-16">
-            <span className="font-heading text-3xl md:text-4xl font-bold">{isRTL ? "لماذا" : "WHY"}</span>
+            <span className="font-heading text-3xl md:text-4xl font-bold text-white">{isRTL ? "لماذا" : "WHY"}</span>
             <div style={{ direction: "ltr" }}><SeenstoreLogo size="lg" /></div>
-            <span className="font-heading text-3xl md:text-4xl font-bold">{isRTL ? "؟" : "?"}</span>
+            <span className="font-heading text-3xl md:text-4xl font-bold text-white">{isRTL ? "؟" : "?"}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {reasons.map((r, i) => (
               <div key={i} className="text-center">
-                <div className="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-[#E63946] mb-4">
+                <div className="mx-auto w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-[#E63946] mb-4">
                   <r.icon className="w-8 h-8" />
                 </div>
-                <h3 className="font-heading font-semibold mb-2">{r.title}</h3>
-                <p className="text-gray-500 text-sm">{r.desc}</p>
+                <h3 className="font-heading font-semibold mb-2 text-white">{r.title}</h3>
+                <p className="text-gray-400 text-sm">{r.desc}</p>
               </div>
             ))}
           </div>
