@@ -71,7 +71,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const isHome  = location === "/";
   const onDark  = !isScrolled && isHome;
-  const textCls = onDark ? "text-white" : "text-gray-800";
+  const textCls = onDark ? "text-white" : "text-gray-100";
 
   const navLinks = [
     { label: t.nav.home,    href: "/",        isRouter: true  },
@@ -82,14 +82,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`min-h-[100dvh] flex flex-col bg-white text-[#1A1A1A] selection:bg-[#E63946] selection:text-white ${isRTL ? "font-[Cairo]" : "font-sans"}`}
+      className={`min-h-[100dvh] flex flex-col bg-background text-foreground selection:bg-[#E63946] selection:text-white ${isRTL ? "font-[Cairo]" : "font-sans"}`}
       dir={isRTL ? "rtl" : "ltr"}
     >
       <SearchOverlay isOpen={showSearch} onClose={() => setShowSearch(false)} />
       {/* ── Header ── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled || !isHome ? "bg-white/90 backdrop-blur-md shadow-sm py-4" : "bg-transparent py-6"
+          isScrolled || !isHome ? "bg-black/90 backdrop-blur-md shadow-sm py-4" : "bg-transparent py-6"
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex items-center justify-between max-w-[1400px]">
@@ -173,21 +173,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <User className="w-5 h-5" />
                   </button>
                   {showUserDropdown && (
-                    <div className={`absolute ${isRTL ? "left-0" : "right-0"} mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-lg py-2 text-black z-50`}>
-                      <div className="px-4 py-2 border-b border-gray-100 mb-2 text-sm">
-                        <p className="font-semibold text-gray-900 truncate">{currentUser?.name}</p>
+                    <div className={`absolute ${isRTL ? "left-0" : "right-0"} mt-2 w-48 bg-[#111] border border-white/10 rounded-lg shadow-lg py-2 text-white z-50`}>
+                      <div className="px-4 py-2 border-b border-white/10 mb-2 text-sm">
+                        <p className="font-semibold text-white truncate">{currentUser?.name}</p>
                       </div>
                       <Link
                         href="/account"
                         onClick={() => setShowUserDropdown(false)}
-                        className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 hover:text-[#E63946] ${isRTL ? "flex-row-reverse text-right" : ""}`}
+                        className={`flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/10 hover:text-[#E63946] ${isRTL ? "flex-row-reverse text-right" : ""}`}
                       >
                         <Package className="w-4 h-4" />
                         {isRTL ? "طلباتي" : "My Orders"}
                       </Link>
                       <button
                         onClick={() => { logout(); setShowUserDropdown(false); }}
-                        className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 hover:text-[#E63946] border-t border-gray-50 mt-1 ${isRTL ? "flex-row-reverse text-right" : ""}`}
+                        className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/10 hover:text-[#E63946] border-t border-white/10 mt-1 ${isRTL ? "flex-row-reverse text-right" : ""}`}
                       >
                         <LogOut className="w-4 h-4" />
                         {t.nav.logout}
@@ -223,12 +223,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: isRTL ? "100%" : "-100%" }}
             transition={{ type: "tween", duration: 0.3 }}
-            className="fixed inset-0 z-[60] bg-white text-black flex flex-col"
+            className="fixed inset-0 z-[60] bg-black text-white flex flex-col"
             dir={isRTL ? "rtl" : "ltr"}
           >
-            <div className="p-6 flex justify-between items-center border-b border-gray-100">
+            <div className="p-6 flex justify-between items-center border-b border-white/10">
               <SeenstoreLogo size="md" />
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-white/10 rounded-full">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -275,7 +275,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
 
               {/* Language in mobile */}
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-white/10">
                 <button
                   onClick={() => setLang(lang === "en" ? "ar" : "en")}
                   className="flex items-center gap-3 text-sm font-semibold hover:text-[#E63946] transition-colors"
@@ -294,7 +294,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 flex flex-col">{children}</main>
 
       {/* ── Footer ── */}
-      <footer className="bg-white pt-20 pb-10 border-t border-gray-100 mt-auto">
+      <footer className="bg-black pt-20 pb-10 border-t border-white/10 mt-auto">
         <div className="container mx-auto px-6 md:px-12 max-w-[1400px]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
 
@@ -305,22 +305,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <p className="text-gray-500 text-sm leading-relaxed mb-8 max-w-sm">{t.footer.tagline}</p>
               <div className="flex items-center gap-4">
                 {[SiInstagram, SiTiktok, SiFacebook].map((Icon, i) => (
-                  <a key={i} href="#" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-[#E63946] hover:text-white transition-colors">
+                  <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
                     <Icon className="w-4 h-4" />
                   </a>
                 ))}
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-[#E63946] hover:text-white transition-colors">
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
                   <SiX className="w-3.5 h-3.5" />
                 </a>
               </div>
             </div>
 
             <div>
-              <h4 className="font-heading font-semibold text-lg text-black mb-6">{t.footer.shop}</h4>
+              <h4 className="font-heading font-semibold text-lg text-white mb-6">{t.footer.shop}</h4>
               <ul className="space-y-4">
                 {t.shopLinks.map(link => (
                   <li key={link}>
-                    <Link href={shopRoutes[link] ?? "/shop"} className="text-gray-500 hover:text-[#E63946] text-sm transition-colors">
+                    <Link href={shopRoutes[link] ?? "/shop"} className="text-gray-400 hover:text-[#E63946] text-sm transition-colors">
                       {link}
                     </Link>
                   </li>
@@ -329,11 +329,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div>
-              <h4 className="font-heading font-semibold text-lg text-black mb-6">{t.footer.support}</h4>
+              <h4 className="font-heading font-semibold text-lg text-white mb-6">{t.footer.support}</h4>
               <ul className="space-y-4">
                 {t.supportLinks.map(link => (
                   <li key={link}>
-                    <Link href={supportRoutes[link] ?? "/faq"} className="text-gray-500 hover:text-[#E63946] text-sm transition-colors">
+                    <Link href={supportRoutes[link] ?? "/faq"} className="text-gray-400 hover:text-[#E63946] text-sm transition-colors">
                       {link}
                     </Link>
                   </li>
@@ -342,8 +342,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div id="contact">
-              <h4 className="font-heading font-semibold text-lg text-black mb-6">{t.footer.contact}</h4>
-              <ul className="space-y-4 text-sm text-gray-500">
+              <h4 className="font-heading font-semibold text-lg text-white mb-6">{t.footer.contact}</h4>
+              <ul className="space-y-4 text-sm text-gray-400">
                 <li>Email: hello@seenstore.com</li>
                 <li>Phone: +20 123 456 7890</li>
                 <li>{isRTL ? "١٢٣ شارع الحضري، القاهرة، مصر" : "123 Urban Street, Cairo, Egypt"}</li>
@@ -351,10 +351,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="md:col-span-2 lg:col-span-1">
-              <h4 className="font-heading font-semibold text-lg text-black mb-6">
+              <h4 className="font-heading font-semibold text-lg text-white mb-6">
                 {isRTL ? "اشترك في نشرتنا" : "Join our Newsletter"}
               </h4>
-              <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+              <p className="text-sm text-gray-400 mb-4 leading-relaxed">
                 {isRTL ? "احصل على خصم ١٠٪ على أول طلب لك وأحدث العروض." : "Get 10% off your first order and latest updates."}
               </p>
               <form 
@@ -365,7 +365,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   type="email" 
                   placeholder={isRTL ? "بريدك الإلكتروني" : "Your email"}
                   required
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-[#E63946] focus:outline-none transition-colors"
+                  className="flex-1 bg-white/10 border border-white/20 text-white placeholder:text-gray-500 rounded-lg px-4 py-2 text-sm focus:border-[#E63946] focus:outline-none transition-colors"
                 />
                 <button 
                   type="submit"
@@ -377,15 +377,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-100 gap-4">
-            <p className="text-sm text-gray-400">
+          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 gap-4">
+            <p className="text-sm text-gray-500">
               &copy; {new Date().getFullYear()} SEENSTORE. {t.footer.rights}
             </p>
             <div className="flex items-center gap-6">
-              <Link href="/privacy" className="text-xs text-gray-400 hover:text-[#E63946] transition-colors">
+              <Link href="/privacy" className="text-xs text-gray-500 hover:text-[#E63946] transition-colors">
                 {isRTL ? "سياسة الخصوصية وشروط الاستخدام" : "Privacy Policy & Terms of Use"}
               </Link>
-              <div className="flex items-center gap-4 text-gray-300">
+              <div className="flex items-center gap-4 text-gray-500">
                 <SiVisa className="w-10 h-6" />
                 <SiMastercard className="w-8 h-6" />
               </div>
