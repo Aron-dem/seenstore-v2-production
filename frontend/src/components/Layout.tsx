@@ -80,7 +80,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className={`min-h-[100dvh] flex flex-col bg-background text-foreground selection:bg-[#E63946] selection:text-white ${isRTL ? "font-[Cairo]" : "font-sans"}`}
+      className={`min-h-[100dvh] flex flex-col bg-background text-foreground selection:bg-[#E63946] selection:text-white overflow-x-hidden ${isRTL ? "font-[Cairo]" : "font-sans"}`}
       dir={isRTL ? "rtl" : "ltr"}
     >
       <SearchOverlay isOpen={showSearch} onClose={() => setShowSearch(false)} />
@@ -94,7 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Mobile menu button */}
           <button
-            className={`md:hidden transition-colors ${onDark ? "text-white" : "text-black"} hover:text-[#E63946]`}
+            className="md:hidden transition-colors text-white hover:text-[#E63946]"
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <Menu className="w-6 h-6" />
@@ -106,38 +106,36 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className={`hidden md:flex items-center ${isRTL ? "space-x-reverse space-x-8" : "space-x-8"}`}>
+          <nav className="hidden md:flex items-center gap-8">
             {navLinks.map(item =>
               item.isRouter ? (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`font-medium text-sm hover:text-[#E63946] transition-colors relative group ${textCls}`}
+                  className="font-medium text-sm text-white hover:text-[#E63946] transition-colors relative group whitespace-nowrap"
                 >
                   {item.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#E63946] transition-all group-hover:w-full" />
+                  <span className="absolute -bottom-1 start-0 w-0 h-0.5 bg-[#E63946] transition-all group-hover:w-full" />
                 </Link>
               ) : (
                 <a
                   key={item.label}
                   href={item.href}
-                  className={`font-medium text-sm hover:text-[#E63946] transition-colors relative group ${textCls}`}
+                  className="font-medium text-sm text-white hover:text-[#E63946] transition-colors relative group whitespace-nowrap"
                 >
                   {item.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#E63946] transition-all group-hover:w-full" />
+                  <span className="absolute -bottom-1 start-0 w-0 h-0.5 bg-[#E63946] transition-all group-hover:w-full" />
                 </a>
               )
             )}
           </nav>
 
           {/* Actions */}
-          <div className={`flex items-center gap-4 ${onDark ? "text-white" : "text-black"}`}>
+          <div className="flex items-center gap-4 text-white">
             {/* Language toggle */}
             <button
               onClick={() => setLang(lang === "en" ? "ar" : "en")}
-              className={`text-xs font-bold px-2.5 py-1 rounded-full border-2 transition-all hover:border-[#E63946] hover:text-[#E63946] ${
-                onDark ? "border-white/40 text-white" : "border-gray-300 text-gray-700"
-              }`}
+              className="text-xs font-bold px-2.5 py-1 rounded-full border-2 border-white/40 text-white transition-all hover:border-[#E63946] hover:text-[#E63946]"
             >
               {lang === "en" ? "AR" : "EN"}
             </button>
@@ -151,7 +149,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Search className="w-5 h-5" />
               <span className="hidden lg:inline text-xs opacity-60">Ctrl+K</span>
             </button>
-            <Link href="/wishlist" className={`relative hover:text-[#E63946] transition-colors hidden sm:block ${wishlistCount > 0 ? "text-[#E63946]" : ""}`} aria-label="Wishlist">
+            <Link href="/wishlist" className={`relative hover:text-[#E63946] transition-colors hidden sm:block ${wishlistCount > 0 ? "text-[#E63946]" : "text-white"}`} aria-label="Wishlist">
               <Heart className={`w-5 h-5 ${wishlistCount > 0 ? "fill-[#E63946]" : ""}`} />
               {wishlistCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#E63946] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">

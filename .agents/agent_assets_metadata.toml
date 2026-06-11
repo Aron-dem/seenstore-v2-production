@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "RgEhqz4BEaK4YbJG4GXHQ"
+uri = "file://seenstore-vercel.zip"
+type = "unspecified"
+title = "Seenstore — مشروع Vercel كامل"
