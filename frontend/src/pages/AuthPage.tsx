@@ -150,7 +150,7 @@ export default function AuthPage() {
       </div>
 
       {/* Form Panel */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative text-gray-900">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-black relative text-white">
         <AnimatePresence mode="wait">
           {isSuccess ? (
             <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center w-full max-w-md">
@@ -163,24 +163,24 @@ export default function AuthPage() {
           ) : (
             <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-md">
               <div className="md:hidden mb-10 text-center">
-                <h1 className="text-3xl font-heading font-bold tracking-tighter">{c.brand}</h1>
+                <h1 className="text-3xl font-heading font-bold tracking-tighter text-white">{c.brand}</h1>
               </div>
 
               {/* Tabs */}
-              <div className="flex border-b mb-8">
+              <div className="flex border-b border-white/20 mb-8">
                 <button onClick={() => { setIsLogin(true); setError(""); }}
-                  className={`flex-1 pb-4 text-center font-heading font-bold text-lg transition-colors relative ${isLogin ? "text-black" : "text-gray-400 hover:text-gray-600"}`}>
+                  className={`flex-1 pb-4 text-center font-heading font-bold text-lg transition-colors relative ${isLogin ? "text-white" : "text-gray-500 hover:text-gray-300"}`}>
                   {c.login}
                   {isLogin && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-[#E63946]" />}
                 </button>
                 <button onClick={() => { setIsLogin(false); setError(""); }}
-                  className={`flex-1 pb-4 text-center font-heading font-bold text-lg transition-colors relative ${!isLogin ? "text-black" : "text-gray-400 hover:text-gray-600"}`}>
+                  className={`flex-1 pb-4 text-center font-heading font-bold text-lg transition-colors relative ${!isLogin ? "text-white" : "text-gray-500 hover:text-gray-300"}`}>
                   {c.register}
                   {!isLogin && <motion.div layoutId="tab" className="absolute bottom-0 left-0 right-0 h-1 bg-[#E63946]" />}
                 </button>
               </div>
 
-              <h2 className="text-2xl font-bold mb-6">{isLogin ? c.welcomeBack : c.createAcc}</h2>
+              <h2 className="text-2xl font-bold mb-6 text-white">{isLogin ? c.welcomeBack : c.createAcc}</h2>
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">{error}</div>
@@ -189,32 +189,32 @@ export default function AuthPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {!isLogin && (
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-700">{c.fullName}</label>
+                    <label className="block text-sm font-bold mb-2 text-gray-300">{c.fullName}</label>
                     <input type="text" value={name} onChange={e => setName(e.target.value)}
-                      className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors"
+                      className="w-full border-2 border-white/20 bg-white/10 text-white p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                       placeholder={c.namePh} />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-700">{c.email}</label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">{c.email}</label>
                   <input type="email" value={email} onChange={e => setEmail(e.target.value)} dir="ltr"
-                    className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors"
+                    className="w-full border-2 border-white/20 bg-white/10 text-white p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                     placeholder={c.emailPh} />
                 </div>
 
                 {!isLogin && (
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-700">{c.phone}</label>
+                    <label className="block text-sm font-bold mb-2 text-gray-300">{c.phone}</label>
                     <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} dir="ltr"
-                      className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors"
+                      className="w-full border-2 border-white/20 bg-white/10 text-white p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                       placeholder={c.phonePh} />
                   </div>
                 )}
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-sm font-bold text-gray-700">{c.password}</label>
+                    <label className="block text-sm font-bold text-gray-300">{c.password}</label>
                     {isLogin && (
                       <button type="button" onClick={() => toast.info(isRTL ? "ميزة استعادة كلمة المرور قيد التطوير" : "Password recovery feature is under development")} 
                         className="text-xs font-semibold text-gray-400 hover:text-[#E63946] transition-colors">
@@ -223,7 +223,7 @@ export default function AuthPage() {
                     )}
                   </div>
                   <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                    className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors"
+                    className="w-full border-2 border-white/20 bg-white/10 text-white p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                     placeholder={c.passPh} />
                   {!isLogin && password.length > 0 && (
                     <div className="mt-2 flex gap-1 h-1">
@@ -236,21 +236,21 @@ export default function AuthPage() {
 
                 {!isLogin && (
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-700">{c.confirmPass}</label>
+                    <label className="block text-sm font-bold mb-2 text-gray-300">{c.confirmPass}</label>
                     <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                      className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors"
+                      className="w-full border-2 border-white/20 bg-white/10 text-white p-3 rounded-lg focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                       placeholder={c.passPh} />
                   </div>
                 )}
 
                 {!isLogin && (
                   <label className="flex items-start gap-2 cursor-pointer mt-4">
-                    <input type="checkbox" required className="w-4 h-4 accent-[#E63946] rounded border-gray-300 mt-1 flex-shrink-0" />
-                    <span className="text-sm text-gray-600 font-medium leading-relaxed">
+                    <input type="checkbox" required className="w-4 h-4 accent-[#E63946] rounded border-white/20 mt-1 flex-shrink-0" />
+                    <span className="text-sm text-gray-400 font-medium leading-relaxed">
                       {c.terms}{" "}
-                      <a href="#" className="text-black underline">{c.tos}</a>{" "}
+                      <a href="#" className="text-white underline">{c.tos}</a>{" "}
                       {c.and}{" "}
-                      <a href="#" className="text-black underline">{c.privacy}</a>
+                      <a href="#" className="text-white underline">{c.privacy}</a>
                     </span>
                   </label>
                 )}
@@ -263,13 +263,13 @@ export default function AuthPage() {
               </form>
 
               <div className="flex items-center gap-4 my-6">
-                <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-sm text-gray-400 font-medium">{c.or}</span>
-                <div className="flex-1 h-px bg-gray-200" />
+                <div className="flex-1 h-px bg-white/20" />
+                <span className="text-sm text-gray-500 font-medium">{c.or}</span>
+                <div className="flex-1 h-px bg-white/20" />
               </div>
 
               <a href="/api/auth/google"
-                className="w-full flex items-center justify-center gap-3 border-2 border-gray-200 py-3 rounded-lg font-bold hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                className="w-full flex items-center justify-center gap-3 border-2 border-white/20 bg-white/5 text-white py-3 rounded-lg font-bold hover:bg-white/10 hover:border-white/40 transition-colors">
                 <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
