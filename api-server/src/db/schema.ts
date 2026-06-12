@@ -63,11 +63,13 @@ export const productsTable = pgTable("products", {
   colors:        text("colors").array().notNull().default(sql`'{}'::text[]`),
   images:        text("images").array().notNull().default(sql`'{}'::text[]`),
   inStock:       boolean("in_stock").notNull().default(true),
+  season:        text("season"),
   createdAt:     timestamp("created_at").notNull().defaultNow(),
   updatedAt:     timestamp("updated_at").notNull().defaultNow(),
 }, (t) => [
   index("products_category_idx").on(t.category),
   index("products_in_stock_idx").on(t.inStock),
+  index("products_season_idx").on(t.season),
 ]);
 
 export type Product = typeof productsTable.$inferSelect;
@@ -84,6 +86,7 @@ export const insertProductSchema = z.object({
   colors:        z.array(z.string()).optional(),
   images:        z.array(z.string()).optional(),
   inStock:       z.boolean().optional(),
+  season:        z.enum(["summer", "winter"]).nullable().optional(),
 });
 
 // ─── Orders ───────────────────────────────────────────────────────────────────

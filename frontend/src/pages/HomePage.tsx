@@ -112,8 +112,8 @@ export default function HomePage() {
   });
 
   const categories = [
-    { id: 1, name: isRTL ? "كولكشن الصيف" : "Summer Collection", image: catSummer, key: "T-Shirts" },
-    { id: 2, name: isRTL ? "كولكشن الشتاء" : "Winter Collection", image: catWinter, key: "Hoodies" },
+    { id: 1, name: isRTL ? "كولكشن الصيف" : "Summer Collection", image: catSummer, href: "/shop/summer" },
+    { id: 2, name: isRTL ? "كولكشن الشتاء" : "Winter Collection", image: catWinter, href: "/shop/winter" },
   ];
 
   const [featuredProducts, setFeaturedProducts] = useState<ApiProduct[]>([]);
@@ -214,7 +214,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {categories.map((cat, idx) => (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.5, delay: idx * 0.1 }}>
-                <Link href={`/shop?category=${cat.key}`} className="group relative h-[400px] rounded-xl overflow-hidden cursor-pointer block">
+                <Link href={cat.href} className="group relative h-[400px] rounded-xl overflow-hidden cursor-pointer block">
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500 z-10" />
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 z-20 flex flex-col justify-end p-6">

@@ -37,7 +37,7 @@ type Product = {
   price: number; originalPrice: number | null;
   category: string; badge: string | null;
   sizes: string[]; colors: string[]; images: string[];
-  inStock: boolean; createdAt: string;
+  inStock: boolean; season: string | null; createdAt: string;
 };
 
 type ProductForm = {
@@ -45,15 +45,17 @@ type ProductForm = {
   category: string; badge: string;
   sizes: string[]; colors: string; images: string[];
   description: string; descriptionAr: string; inStock: boolean;
+  season: "" | "summer" | "winter";
 };
 
 const INIT_FORM: ProductForm = {
   name: "", nameAr: "", price: "", originalPrice: "",
   category: "T-Shirts", badge: "", sizes: [], colors: "",
   images: [], description: "", descriptionAr: "", inStock: true,
+  season: "",
 };
 
-const CATEGORIES = ["T-Shirts", "Pants", "Hoodies", "Accessories", "Summer Collection", "Winter Collection"];
+const CATEGORIES = ["T-Shirts", "Pants", "Hoodies", "Accessories"];
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const CUSTOM_STATUS: Record<string, { label: string; color: string }> = {
@@ -188,6 +190,7 @@ function ProductModal({ product, onClose, onSaved }: {
     sizes: product.sizes, colors: product.colors.join(", "),
     images: product.images, description: product.description,
     descriptionAr: product.descriptionAr, inStock: product.inStock,
+    season: (product.season as "" | "summer" | "winter") ?? "",
   } : INIT_FORM);
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState("");
@@ -241,6 +244,7 @@ function ProductModal({ product, onClose, onSaved }: {
         description:   form.description.trim(),
         descriptionAr: form.descriptionAr.trim(),
         inStock:       form.inStock,
+        season:        form.season || null,
       };
       let saved: Product;
       if (product) {
@@ -309,7 +313,7 @@ function ProductModal({ product, onClose, onSaved }: {
             </div>
           </div>
 
-          {/* Category + In Stock */}
+          {/* Category + Season */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Category *</label>
@@ -318,15 +322,26 @@ function ProductModal({ product, onClose, onSaved }: {
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <div className="flex flex-col justify-end">
-              <label className="flex items-center gap-3 cursor-pointer pb-1">
-                <div className={`w-12 h-6 rounded-full transition-colors relative ${form.inStock ? "bg-black" : "bg-gray-300"}`}
-                  onClick={() => set("inStock", !form.inStock)}>
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.inStock ? "left-7" : "left-1"}`} />
-                </div>
-                <span className="text-sm font-semibold">{form.inStock ? "In Stock" : "Out of Stock"}</span>
-              </label>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Season</label>
+              <select value={form.season} onChange={e => set("season", e.target.value)}
+                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none bg-white">
+                <option value="">— No Season —</option>
+                <option value="summer">☀️ Summer</option>
+                <option value="winter">❄️ Winter</option>
+              </select>
             </div>
+          </div>
+
+          {/* In Stock */}
+          <div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className={`w-12 h-6 rounded-full transition-colors relative ${form.inStock ? "bg-black" : "bg-gray-300"}`}
+                onClick={() => set("inStock", !form.inStock)}>
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.inStock ? "left-7" : "left-1"}`} />
+              </div>
+              <span className="text-sm font-semibold">{form.inStock ? "In Stock" : "Out of Stock"}</span>
+            </label>
           </div>
 
           {/* Sizes */}

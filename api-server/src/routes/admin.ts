@@ -142,6 +142,7 @@ const productSchema = z.object({
   colors:        z.array(z.string()).default([]),
   images:        z.array(z.string().url()).default([]),
   inStock:       z.boolean().default(true),
+  season:        z.enum(["summer", "winter"]).nullable().optional(),
 });
 
 router.get("/admin/products", requireAdmin, async (req, res) => {

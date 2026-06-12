@@ -7,11 +7,14 @@ import { ShoppingBag, Heart, Filter, Grid, List, X, Check, Loader2 } from "lucid
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 
-const CATEGORIES = [
+const ALL_CATEGORIES = [
   { label: "T-Shirts", labelAr: "تيشيرتات", keys: ["T-Shirts"] },
   { label: "Hoodies",  labelAr: "هوديز",    keys: ["Hoodies"]  },
   { label: "Pants",    labelAr: "بناطيل",   keys: ["Pants"]    },
 ];
+
+const SUMMER_CATS = ["T-Shirts", "Pants"];
+const WINTER_CATS = ["Hoodies", "Pants"];
 const SIZES     = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLORS    = [
   { name: "Black",  hex: "#000000" },
@@ -46,6 +49,7 @@ interface SidebarProps {
   selectedColors:  string[];
   priceRange:      number;
   isRTL:           boolean;
+  allowedCats:     string[];
   onToggleCat:     (v: string) => void;
   onToggleSize:    (v: string) => void;
   onToggleColor:   (v: string) => void;
@@ -54,9 +58,12 @@ interface SidebarProps {
   labels: { clearAll: string; categories: string; priceRange: string; size: string; color: string; };
 }
 
-function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, priceRange, isRTL, onToggleCat, onToggleSize, onToggleColor, onPriceChange, onClearAll, labels }: SidebarProps) {
+function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, priceRange, isRTL, allowedCats, onToggleCat, onToggleSize, onToggleColor, onPriceChange, onClearAll, labels }: SidebarProps) {
   const hasActive = selectedCats.length > 0 || selectedSizes.length > 0 || selectedColors.length > 0 || priceRange < 2000;
   const pct = (priceRange / 2000) * 100;
+  const visibleCats = allowedCats.length > 0
+    ? ALL_CATEGORIES.filter(c => allowedCats.includes(c.label))
+    : ALL_CATEGORIES;
   return (
     <div className="space-y-8">
       {hasActive && (
@@ -67,7 +74,7 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
       <div>
         <h3 className="font-heading font-bold text-base mb-4 uppercase tracking-wide">{labels.categories}</h3>
         <div className="space-y-3">
-          {CATEGORIES.map(cat => {
+          {visibleCats.map(cat => {
             const active = cat.keys.every(k => selectedCats.includes(k));
             const count  = products.filter(p => cat.keys.includes(p.category)).length;
             return (
@@ -128,11 +135,10 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
 }
 
 interface ShopPageProps {
-  initialCategories?: string[];
   season?: "summer" | "winter";
 }
 
-export default function ShopPage({ initialCategories = [], season }: ShopPageProps = {}) {
+export default function ShopPage({ season }: ShopPageProps = {}) {
   const seasonMeta = season === "summer"
     ? { title: "Summer Collection — كولكشن الصيف | SEENSTORE", desc: "تسوق كولكشن الصيف — تيشيرتات وبناطيل ستريت وير.", canonical: "https://seenstore.com/shop/summer" }
     : season === "winter"
@@ -156,7 +162,7 @@ export default function ShopPage({ initialCategories = [], season }: ShopPagePro
 
   const [products,       setProducts]       = useState<ApiProduct[]>([]);
   const [loadingProds,   setLoadingProds]   = useState(true);
-  const [selectedCats,   setSelectedCats]   = useState<string[]>(initialCategories);
+  const [selectedCats,   setSelectedCats]   = useState<string[]>([]);
   const [selectedSizes,  setSelectedSizes]  = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [priceRange,     setPriceRange]     = useState(2000);
@@ -168,21 +174,24 @@ export default function ShopPage({ initialCategories = [], season }: ShopPagePro
     (async () => {
       setLoadingProds(true);
       try {
-        const res = await fetch(`${API_BASE}/products`);
+        const url = season
+          ? `${API_BASE}/products?season=${season}`
+          : `${API_BASE}/products`;
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           setProducts(data.products ?? []);
         }
       } catch { /* ignore */ } finally { setLoadingProds(false); }
     })();
-  }, []);
+  }, [season]);
 
   const toggle = useCallback((setter: React.Dispatch<React.SetStateAction<string[]>>, val: string) => {
     setter(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]);
   }, []);
 
   const toggleCat = useCallback((catLabel: string) => {
-    const cat = CATEGORIES.find(c => c.label === catLabel);
+    const cat = ALL_CATEGORIES.find(c => c.label === catLabel);
     if (!cat) return;
     setSelectedCats(prev => {
       const allSelected = cat.keys.every(k => prev.includes(k));
@@ -210,9 +219,11 @@ export default function ShopPage({ initialCategories = [], season }: ShopPagePro
       return 0;
     });
 
+  const allowedCats = season === "summer" ? SUMMER_CATS : season === "winter" ? WINTER_CATS : [];
   const sidebarLabels = { clearAll: t.shop.clearAll, categories: t.shop.categories, priceRange: t.shop.priceRange, size: t.shop.size, color: t.shop.color };
   const sidebarProps: SidebarProps = {
     products, selectedCats, selectedSizes, selectedColors, priceRange, isRTL,
+    allowedCats,
     onToggleCat:   toggleCat,
     onToggleSize:  (v) => toggle(setSelectedSizes, v),
     onToggleColor: (v) => toggle(setSelectedColors, v),

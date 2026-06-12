@@ -11,12 +11,14 @@ router.get("/products", async (req, res) => {
   const maxPrice  = req.query["maxPrice"]  ? parseInt(req.query["maxPrice"] as string, 10) : undefined;
   const minPrice  = req.query["minPrice"]  ? parseInt(req.query["minPrice"] as string, 10) : undefined;
   const inStock   = req.query["inStock"]   === "true" ? true : req.query["inStock"] === "false" ? false : undefined;
-  const sortBy    = req.query["sort"]      as string | undefined; // price_asc | price_desc | newest
+  const sortBy    = req.query["sort"]      as string | undefined;
+  const season    = req.query["season"]    as string | undefined;
 
   let query = db.select().from(productsTable) as any;
 
   const conditions: any[] = [];
   if (category) conditions.push(eq(productsTable.category, category));
+  if (season)   conditions.push(eq(productsTable.season, season));
   if (maxPrice !== undefined && !isNaN(maxPrice)) conditions.push(lte(productsTable.price, maxPrice));
   if (minPrice !== undefined && !isNaN(minPrice)) conditions.push(gte(productsTable.price, minPrice));
   if (inStock !== undefined) conditions.push(eq(productsTable.inStock, inStock));
