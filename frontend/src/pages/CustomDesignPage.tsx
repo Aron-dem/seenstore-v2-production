@@ -142,7 +142,7 @@ export default function CustomDesignPage() {
             {isRTL ? "رقم طلبك هو:" : "Your order number is:"}
           </p>
           <p className="font-heading text-2xl font-bold text-[#E63946] mb-6">{orderId}</p>
-          <div className="bg-gray-50 rounded-2xl p-6 text-left mb-8 text-sm text-gray-700 space-y-2">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-left mb-8 text-sm space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-500">{isRTL ? "القطعة:" : "Item:"}</span>
               <span className="font-semibold">{itemType}</span>

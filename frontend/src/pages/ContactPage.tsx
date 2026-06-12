@@ -69,16 +69,16 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wider">{item.title}</p>
-                <p className="font-medium text-black">{item.value}</p>
+                <p className="font-medium">{item.value}</p>
               </div>
             </div>
           ))}
 
-          <div className="pt-6 border-t border-gray-100">
+          <div className="pt-6 border-t border-zinc-800">
             <p className="text-sm text-gray-500 mb-4">{isAr ? "تابعنا على" : "Follow us on"}</p>
             <div className="flex gap-3">
               {[SiInstagram, SiTiktok, SiFacebook].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-[#E63946] hover:text-white transition-colors">
+                <a key={i} href="#" className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 hover:bg-[#E63946] hover:text-white transition-colors">
                   <Icon className="w-4 h-4" />
                 </a>
               ))}
@@ -87,7 +87,7 @@ export default function ContactPage() {
         </div>
 
         {/* Form */}
-        <div className="lg:col-span-3 bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
+        <div className="lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm p-8 text-white">
           {sent ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -108,28 +108,28 @@ export default function ContactPage() {
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">{isAr ? "الاسم" : "Name"}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الاسم" : "Name"}</label>
                   <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors"
+                    className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                     placeholder={isAr ? "اسمك الكامل" : "Your full name"} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">{isAr ? "البريد الإلكتروني" : "Email"}</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "البريد الإلكتروني" : "Email"}</label>
                   <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors"
+                    className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                     placeholder={isAr ? "بريدك الإلكتروني" : "your@email.com"} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{isAr ? "الموضوع" : "Subject"}</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الموضوع" : "Subject"}</label>
                 <input required value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors"
+                  className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
                   placeholder={isAr ? "موضوع رسالتك" : "What's this about?"} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{isAr ? "الرسالة" : "Message"}</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الرسالة" : "Message"}</label>
                 <textarea required rows={5} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors resize-none"
+                  className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors resize-none placeholder:text-gray-500"
                   placeholder={isAr ? "اكتب رسالتك هنا..." : "Write your message here..."} />
               </div>
               <button type="submit" disabled={sending}

@@ -41,6 +41,7 @@ interface SidebarProps {
   selectedSizes:   string[];
   selectedColors:  string[];
   priceRange:      number;
+  isRTL:           boolean;
   onToggleCat:     (v: string) => void;
   onToggleSize:    (v: string) => void;
   onToggleColor:   (v: string) => void;
@@ -49,8 +50,9 @@ interface SidebarProps {
   labels: { clearAll: string; categories: string; priceRange: string; size: string; color: string; };
 }
 
-function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, priceRange, onToggleCat, onToggleSize, onToggleColor, onPriceChange, onClearAll, labels }: SidebarProps) {
+function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, priceRange, isRTL, onToggleCat, onToggleSize, onToggleColor, onPriceChange, onClearAll, labels }: SidebarProps) {
   const hasActive = selectedCats.length > 0 || selectedSizes.length > 0 || selectedColors.length > 0 || priceRange < 2000;
+  const pct = (priceRange / 2000) * 100;
   return (
     <div className="space-y-8">
       {hasActive && (
@@ -63,11 +65,11 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
         <div className="space-y-3">
           {CATEGORIES.map(c => (
             <button key={c} type="button" onClick={() => onToggleCat(c)} className="flex items-center gap-3 w-full group text-left">
-              <span className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selectedCats.includes(c) ? "bg-[#E63946] border-[#E63946]" : "border-gray-300 group-hover:border-[#E63946]"}`}>
+              <span className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selectedCats.includes(c) ? "bg-[#E63946] border-[#E63946]" : "border-zinc-600 group-hover:border-[#E63946]"}`}>
                 {selectedCats.includes(c) && <Check className="w-3 h-3 text-white" />}
               </span>
-              <span className={`text-sm transition-colors ${selectedCats.includes(c) ? "font-semibold text-black" : "text-gray-600 group-hover:text-black"}`}>{c}</span>
-              <span className="ml-auto text-xs text-gray-400">{products.filter(p => p.category === c).length}</span>
+              <span className={`text-sm transition-colors ${selectedCats.includes(c) ? "font-semibold text-white" : "text-gray-400 group-hover:text-white"}`}>{c}</span>
+              <span className="ml-auto text-xs text-gray-500">{products.filter(p => p.category === c).length}</span>
             </button>
           ))}
         </div>
@@ -78,19 +80,24 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
           <span className="text-gray-500">0 EGP</span>
           <span className="text-[#E63946] font-bold">{priceRange} EGP</span>
         </div>
-        <div className="relative h-6 flex items-center">
-          <div className="absolute left-0 right-0 h-1.5 rounded-full bg-gray-200" />
-          <div className="absolute left-0 h-1.5 rounded-full bg-[#E63946]" style={{ width: `${(priceRange / 2000) * 100}%` }} />
-          <input type="range" min={0} max={2000} step={50} value={priceRange} onChange={e => onPriceChange(Number(e.target.value))} className="absolute inset-0 w-full opacity-0 cursor-pointer h-6" style={{ zIndex: 2 }} />
-          <div className="absolute w-5 h-5 rounded-full bg-[#E63946] shadow-md border-2 border-white pointer-events-none transition-all" style={{ left: `calc(${(priceRange / 2000) * 100}% - 10px)`, zIndex: 1 }} />
+        <div className="relative h-6 flex items-center" dir="ltr">
+          <div className="absolute left-0 right-0 h-1.5 rounded-full bg-zinc-700" />
+          <div className="absolute left-0 h-1.5 rounded-full bg-[#E63946]" style={{ width: `${pct}%` }} />
+          <input
+            type="range" min={0} max={2000} step={50}
+            value={isRTL ? 2000 - priceRange : priceRange}
+            onChange={e => onPriceChange(isRTL ? 2000 - Number(e.target.value) : Number(e.target.value))}
+            className="absolute inset-0 w-full opacity-0 cursor-pointer h-6" style={{ zIndex: 2 }}
+          />
+          <div className="absolute w-5 h-5 rounded-full bg-[#E63946] shadow-md border-2 border-zinc-950 pointer-events-none transition-all" style={{ left: `calc(${pct}% - 10px)`, zIndex: 1 }} />
         </div>
-        <div className="flex justify-between text-xs text-gray-400 mt-2"><span>Min</span><span>Max: 2000 EGP</span></div>
+        <div className="flex justify-between text-xs text-gray-500 mt-2"><span>Min</span><span>Max: 2000 EGP</span></div>
       </div>
       <div>
         <h3 className="font-heading font-bold text-base mb-4 uppercase tracking-wide">{labels.size}</h3>
         <div className="grid grid-cols-3 gap-2">
           {SIZES.map(s => (
-            <button key={s} type="button" onClick={() => onToggleSize(s)} className={`py-2 text-sm border-2 rounded-lg font-medium transition-all ${selectedSizes.includes(s) ? "border-[#E63946] bg-[#E63946] text-white" : "border-gray-200 text-gray-700 hover:border-[#E63946] hover:text-[#E63946]"}`}>{s}</button>
+            <button key={s} type="button" onClick={() => onToggleSize(s)} className={`py-2 text-sm border-2 rounded-lg font-medium transition-all ${selectedSizes.includes(s) ? "border-[#E63946] bg-[#E63946] text-white" : "border-zinc-700 text-gray-300 hover:border-[#E63946] hover:text-[#E63946]"}`}>{s}</button>
           ))}
         </div>
       </div>
@@ -98,7 +105,7 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
         <h3 className="font-heading font-bold text-base mb-4 uppercase tracking-wide">{labels.color}</h3>
         <div className="flex flex-wrap gap-3">
           {COLORS.map(c => (
-            <button key={c.name} type="button" onClick={() => onToggleColor(c.name)} title={c.name} className={`relative w-9 h-9 rounded-full border-2 transition-all hover:scale-110 ${selectedColors.includes(c.name) ? "border-[#E63946] scale-110 shadow-md" : "border-gray-200 hover:border-gray-400"}`} style={{ backgroundColor: c.hex }}>
+            <button key={c.name} type="button" onClick={() => onToggleColor(c.name)} title={c.name} className={`relative w-9 h-9 rounded-full border-2 transition-all hover:scale-110 ${selectedColors.includes(c.name) ? "border-[#E63946] scale-110 shadow-md" : "border-zinc-700 hover:border-zinc-400"}`} style={{ backgroundColor: c.hex }}>
               {selectedColors.includes(c.name) && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <Check className={`w-4 h-4 ${c.name === "White" || c.name === "Beige" ? "text-gray-600" : "text-white"}`} />
@@ -175,7 +182,7 @@ export default function ShopPage() {
 
   const sidebarLabels = { clearAll: t.shop.clearAll, categories: t.shop.categories, priceRange: t.shop.priceRange, size: t.shop.size, color: t.shop.color };
   const sidebarProps: SidebarProps = {
-    products, selectedCats, selectedSizes, selectedColors, priceRange,
+    products, selectedCats, selectedSizes, selectedColors, priceRange, isRTL,
     onToggleCat:   (v) => toggle(setSelectedCats, v),
     onToggleSize:  (v) => toggle(setSelectedSizes, v),
     onToggleColor: (v) => toggle(setSelectedColors, v),
@@ -193,15 +200,15 @@ export default function ShopPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: isRTL ? "100%" : "-100%" }}
             transition={{ type: "tween", duration: 0.25 }}
-            className="fixed inset-0 z-[70] bg-white overflow-y-auto"
+            className="fixed inset-0 z-[70] bg-zinc-950 overflow-y-auto"
             dir={isRTL ? "rtl" : "ltr"}
           >
-            <div className="flex justify-between items-center p-6 border-b">
+            <div className="flex justify-between items-center p-6 border-b border-zinc-800">
               <h2 className="text-xl font-heading font-bold">{t.shop.filters}</h2>
-              <button onClick={() => setMobileOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X className="w-5 h-5" /></button>
+              <button onClick={() => setMobileOpen(false)} className="p-2 hover:bg-zinc-800 rounded-full"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6"><FilterSidebar {...sidebarProps} /></div>
-            <div className="sticky bottom-0 p-6 bg-white border-t">
+            <div className="sticky bottom-0 p-6 bg-zinc-950 border-t border-zinc-800">
               <button onClick={() => setMobileOpen(false)} className="w-full bg-[#E63946] text-white py-3 rounded-xl font-bold tracking-wide hover:bg-red-700 transition">
                 {filtered.length} {t.shop.title}
               </button>
@@ -232,14 +239,14 @@ export default function ShopPage() {
                   </span>
                 )}
               </button>
-              <select value={sort} onChange={e => setSort(e.target.value)} className="border-2 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E63946] ml-auto">
+              <select value={sort} onChange={e => setSort(e.target.value)} className="border-2 border-zinc-700 bg-zinc-900 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E63946] ml-auto">
                 <option value="Latest">{t.shop.sort.latest}</option>
                 <option value="Price Low-High">{t.shop.sort.priceLow}</option>
                 <option value="Price High-Low">{t.shop.sort.priceHigh}</option>
               </select>
-              <div className="hidden sm:flex border-2 rounded-lg overflow-hidden">
-                <button onClick={() => setView("grid")} className={`p-2 transition ${view === "grid" ? "bg-black text-white" : "hover:bg-gray-100"}`}><Grid className="w-4 h-4" /></button>
-                <button onClick={() => setView("list")} className={`p-2 transition ${view === "list" ? "bg-black text-white" : "hover:bg-gray-100"}`}><List className="w-4 h-4" /></button>
+              <div className="hidden sm:flex border-2 border-zinc-700 rounded-lg overflow-hidden">
+                <button onClick={() => setView("grid")} className={`p-2 transition ${view === "grid" ? "bg-white text-black" : "hover:bg-zinc-800"}`}><Grid className="w-4 h-4" /></button>
+                <button onClick={() => setView("list")} className={`p-2 transition ${view === "list" ? "bg-white text-black" : "hover:bg-zinc-800"}`}><List className="w-4 h-4" /></button>
               </div>
             </div>
           </div>
@@ -261,13 +268,13 @@ export default function ShopPage() {
           {loadingProds ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse">
-                  <div className="aspect-[3/4] bg-gray-200" />
+                <div key={i} className="bg-zinc-900 rounded-xl overflow-hidden shadow-sm animate-pulse">
+                  <div className="aspect-[3/4] bg-zinc-800" />
                   <div className="p-4 space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-5 bg-gray-200 rounded w-1/3" />
-                    <div className="h-10 bg-gray-200 rounded" />
+                    <div className="h-3 bg-zinc-800 rounded w-1/2" />
+                    <div className="h-4 bg-zinc-800 rounded w-3/4" />
+                    <div className="h-5 bg-zinc-800 rounded w-1/3" />
+                    <div className="h-10 bg-zinc-800 rounded" />
                   </div>
                 </div>
               ))}
@@ -293,9 +300,9 @@ export default function ShopPage() {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: idx * 0.04 }}
-                    className={`group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ${view === "list" ? "flex gap-5 items-center p-4" : ""}`}
+                    className={`group bg-zinc-900 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ${view === "list" ? "flex gap-5 items-center p-4" : ""}`}
                   >
-                    <div className={`relative overflow-hidden bg-gray-100 ${view === "list" ? "w-44 h-56 flex-shrink-0 rounded-lg" : "aspect-[3/4]"}`}>
+                    <div className={`relative overflow-hidden bg-zinc-800 ${view === "list" ? "w-44 h-56 flex-shrink-0 rounded-lg" : "aspect-[3/4]"}`}>
                       {p.badge && (
                         <span className={`absolute top-3 left-3 z-10 text-[10px] font-bold px-2 py-1 rounded text-white ${p.badge === "SALE" ? "bg-[#E63946]" : "bg-black"}`}>
                           {p.badge}

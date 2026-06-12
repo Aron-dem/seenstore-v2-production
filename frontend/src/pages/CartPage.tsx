@@ -29,7 +29,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-6 py-32 text-center max-w-[1400px] flex flex-col items-center">
-        <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-8">
+        <div className="w-32 h-32 bg-zinc-900 rounded-full flex items-center justify-center mb-8">
           <ShoppingBag className="w-12 h-12 text-gray-300" />
         </div>
         <h1 className="text-3xl font-heading font-bold mb-4">{t.cartPage.empty}</h1>
@@ -56,9 +56,9 @@ export default function CartPage() {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
             {/* Header */}
-            <div className="hidden md:grid grid-cols-12 gap-4 p-6 bg-gray-50 border-b font-bold text-sm">
+            <div className="hidden md:grid grid-cols-12 gap-4 p-6 bg-zinc-800 border-b border-zinc-700 font-bold text-sm">
               <div className="col-span-5">{t.cartPage.product}</div>
               <div className="col-span-2 text-center">{t.cartPage.price}</div>
               <div className="col-span-2 text-center">{t.cartPage.quantity}</div>
@@ -85,10 +85,10 @@ export default function CartPage() {
                   </div>
                   <div className="md:col-span-2">
                     <div className="md:hidden text-xs text-gray-500 mb-1">{t.cartPage.quantity}</div>
-                    <div className="flex items-center justify-center border border-gray-200 rounded-lg">
-                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2 py-1 hover:bg-gray-50">−</button>
+                    <div className="flex items-center justify-center border border-zinc-700 rounded-lg">
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2 py-1 hover:bg-zinc-800">−</button>
                       <span className="px-3 py-1 font-bold">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-2 py-1 hover:bg-gray-50">+</button>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-2 py-1 hover:bg-zinc-800">+</button>
                     </div>
                   </div>
                   <div className="md:col-span-2 text-right">
@@ -112,7 +112,7 @@ export default function CartPage() {
               value={promoCode}
               onChange={e => setPromoCode(e.target.value)}
               placeholder={t.cartPage.promoPlaceholder}
-              className="flex-1 border-2 border-gray-200 px-4 py-3 rounded-lg focus:border-[#E63946] outline-none"
+              className="flex-1 border-2 border-zinc-700 bg-zinc-900 text-white px-4 py-3 rounded-lg focus:border-[#E63946] outline-none placeholder:text-gray-500"
             />
             <button type="submit" className="bg-gray-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-black transition-colors">
               {isPromoApplied ? t.cartPage.applied : t.cartPage.apply}
@@ -122,7 +122,7 @@ export default function CartPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 sticky top-24">
+          <div className="bg-zinc-900 p-6 rounded-lg border border-zinc-800 sticky top-24">
             <h3 className="font-heading font-bold text-lg mb-6">{t.cartPage.orderSummary}</h3>
 
             <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
