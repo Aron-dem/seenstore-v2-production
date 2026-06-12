@@ -300,7 +300,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </Link>
               <p className="text-gray-500 text-sm leading-relaxed mb-8 max-w-sm">{t.footer.tagline}</p>
               <div className="flex items-center gap-4">
-                {[SiInstagram, SiTiktok, SiFacebook].map((Icon, i) => (
+                <a href="https://www.instagram.com/seen_store.20?igsh=dmJveGU5ZWxvdjJ3&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
+                  <SiInstagram className="w-4 h-4" />
+                </a>
+                {[SiTiktok, SiFacebook].map((Icon, i) => (
                   <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
                     <Icon className="w-4 h-4" />
                   </a>
