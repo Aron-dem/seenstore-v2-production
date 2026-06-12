@@ -53,3 +53,8 @@ externalPort = 80
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[userenv]
+
+[userenv.shared]
+GOOGLE_REDIRECT_URI = "https://5c87c4eb-f367-42fc-895b-7df03ffab2cd-00-2n1v1cv51naj8.spock.replit.dev/api/auth/google/callback"
