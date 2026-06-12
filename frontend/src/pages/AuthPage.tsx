@@ -150,7 +150,7 @@ export default function AuthPage() {
       </div>
 
       {/* Form Panel */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative text-gray-900">
         <AnimatePresence mode="wait">
           {isSuccess ? (
             <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center w-full max-w-md">

@@ -18,9 +18,8 @@ type ApiProduct = {
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect fill='%23f3f4f6' width='400' height='533'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='24' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3ESEENSTORE%3C/text%3E%3C/svg%3E";
 
 import heroImg from "../assets/hero.png";
-import catTshirts from "../assets/cat-tshirts.png";
-import catPants from "../assets/cat-pants.png";
-import catHoodies from "../assets/cat-hoodies.png";
+import catSummer from "../assets/cat-tshirts.png";
+import catWinter from "../assets/cat-hoodies.png";
 
 const faqsEn = [
   { q: "How long does shipping take?",           a: "Standard shipping takes 2–5 business days. Express (1–2 days) is available at checkout." },
@@ -113,9 +112,8 @@ export default function HomePage() {
   });
 
   const categories = [
-    { id: 1, name: t.categories.tShirts, image: catTshirts, key: "T-Shirts" },
-    { id: 2, name: t.categories.pants, image: catPants, key: "Pants" },
-    { id: 3, name: t.categories.hoodies, image: catHoodies, key: "Hoodies" },
+    { id: 1, name: isRTL ? "كولكشن الصيف" : "Summer Collection", image: catSummer, key: "T-Shirts" },
+    { id: 2, name: isRTL ? "كولكشن الشتاء" : "Winter Collection", image: catWinter, key: "Hoodies" },
   ];
 
   const [featuredProducts, setFeaturedProducts] = useState<ApiProduct[]>([]);
@@ -213,7 +211,7 @@ export default function HomePage() {
               <ChevronRight className={`w-4 h-4 ${isRTL ? "mr-1 rotate-180" : "ml-1"} group-hover:translate-x-1 transition-transform`} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {categories.map((cat, idx) => (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.5, delay: idx * 0.1 }}>
                 <Link href={`/shop?category=${cat.key}`} className="group relative h-[400px] rounded-xl overflow-hidden cursor-pointer block">
