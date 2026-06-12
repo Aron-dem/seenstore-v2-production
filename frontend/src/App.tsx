@@ -45,6 +45,8 @@ export default function App() {
           <Switch>
             <Route path="/" component={HomePage} />
             <Route path="/shop" component={ShopPage} />
+            <Route path="/shop/summer">{() => <ShopPage season="summer" initialCategories={["T-Shirts", "Pants"]} />}</Route>
+            <Route path="/shop/winter">{() => <ShopPage season="winter" initialCategories={["Hoodies", "Pants"]} />}</Route>
             <Route path="/product/:id" component={ProductDetailPage} />
             <Route path="/cart" component={CartPage} />
             <Route path="/auth" component={AuthPage} />

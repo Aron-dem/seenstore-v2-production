@@ -129,15 +129,26 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
   );
 }
 
-export default function ShopPage() {
+interface ShopPageProps {
+  initialCategories?: string[];
+  season?: "summer" | "winter";
+}
+
+export default function ShopPage({ initialCategories = [], season }: ShopPageProps = {}) {
+  const seasonMeta = season === "summer"
+    ? { title: "Summer Collection — كولكشن الصيف | SEENSTORE", desc: "تسوق كولكشن الصيف — تيشيرتات وبناطيل ستريت وير.", canonical: "https://seenstore.com/shop/summer" }
+    : season === "winter"
+    ? { title: "Winter Collection — كولكشن الشتاء | SEENSTORE", desc: "تسوق كولكشن الشتاء — هوديز وبناطيل ستريت وير.", canonical: "https://seenstore.com/shop/winter" }
+    : { title: "Shop All — تسوق الكل | ملابس ستريت وير", desc: "تسوق كل منتجات SEENSTORE. هوديز، كارجو بانت، تيشيرتات، وإكسسوارات ستريت وير بأسعار منافسة.", canonical: "https://seenstore.com/shop" };
+
   useSEO({
-    title:       "Shop All — تسوق الكل | ملابس ستريت وير",
-    description: "تسوق كل منتجات SEENSTORE. هوديز، كارجو بانت، تيشيرتات، وإكسسوارات ستريت وير بأسعار منافسة.",
+    title:       seasonMeta.title,
+    description: seasonMeta.desc,
     keywords:    "تسوق ملابس ستريت وير, shop streetwear egypt, هوديز, كارجو بانت, تيشيرتات مصر",
-    canonical:   "https://seenstore.com/shop",
+    canonical:   seasonMeta.canonical,
     jsonLd: {
       "@context": "https://schema.org", "@type": "CollectionPage",
-      "name": "SEENSTORE Shop — تسوق الكل",
+      "name": seasonMeta.title,
     },
   });
 
@@ -147,7 +158,7 @@ export default function ShopPage() {
 
   const [products,       setProducts]       = useState<ApiProduct[]>([]);
   const [loadingProds,   setLoadingProds]   = useState(true);
-  const [selectedCats,   setSelectedCats]   = useState<string[]>([]);
+  const [selectedCats,   setSelectedCats]   = useState<string[]>(initialCategories);
   const [selectedSizes,  setSelectedSizes]  = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [priceRange,     setPriceRange]     = useState(2000);
@@ -212,8 +223,27 @@ export default function ShopPage() {
     labels:        sidebarLabels,
   };
 
+  const seasonBanner = season === "summer"
+    ? { emoji: "☀️", en: "Summer Collection", ar: "كولكشن الصيف", sub: isRTL ? "تيشيرتات وبناطيل" : "T-Shirts & Pants", bg: "from-orange-900/40 to-yellow-900/20", border: "border-orange-500/30" }
+    : season === "winter"
+    ? { emoji: "❄️", en: "Winter Collection", ar: "كولكشن الشتاء", sub: isRTL ? "هوديز وبناطيل" : "Hoodies & Pants", bg: "from-blue-900/40 to-cyan-900/20", border: "border-blue-500/30" }
+    : null;
+
   return (
     <div className="container mx-auto px-6 py-24 max-w-[1400px]">
+      {seasonBanner && (
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mb-8 rounded-2xl bg-gradient-to-r ${seasonBanner.bg} border ${seasonBanner.border} px-6 py-5 flex items-center gap-4`}
+        >
+          <span className="text-4xl">{seasonBanner.emoji}</span>
+          <div>
+            <h2 className="text-xl font-heading font-bold text-white">{isRTL ? seasonBanner.ar : seasonBanner.en}</h2>
+            <p className="text-sm text-gray-400">{seasonBanner.sub}</p>
+          </div>
+        </motion.div>
+      )}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
