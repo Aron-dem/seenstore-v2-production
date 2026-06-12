@@ -152,7 +152,7 @@ export default function CheckoutPage() {
     setIsLoading(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const token = localStorage.getItem("seenstore_access_token");
+      const token = localStorage.getItem("seen_access_token");
       if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch("/api/orders", {
         method: "POST", headers,

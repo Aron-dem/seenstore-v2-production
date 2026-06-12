@@ -1,0 +1,2 @@
+- [Drizzle postgres-js execute shape](drizzle-postgres-js-execute.md) — `db.execute(sql`...`)` returns array directly, NOT `{ rows: [] }` — use `[row] = await db.execute(...)`.
+- [Token key alignment](token-key.md) — all auth token reads must use `seen_access_token` (not `seenstore_access_token`); `apiClient.ts` is the canonical source.

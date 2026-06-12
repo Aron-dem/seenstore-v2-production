@@ -125,7 +125,7 @@ function OrderModal({ order, onClose, isRTL, onUpdate }: {
       className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
         onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        className="bg-zinc-900 text-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         <div className="bg-black text-white p-5 flex justify-between items-center flex-shrink-0">
           <div>
             <p className="text-gray-400 text-xs">Custom Design Order</p>
@@ -145,18 +145,18 @@ function OrderModal({ order, onClose, isRTL, onUpdate }: {
           </div>
           {order.details && (
             <div><p className="text-xs text-gray-400 mb-1">Details</p>
-              <p className="text-sm bg-gray-50 rounded-xl p-3 text-gray-700">{order.details}</p></div>
+              <p className="text-sm bg-zinc-800 rounded-xl p-3 text-gray-300">{order.details}</p></div>
           )}
           {order.designUrl && (
             <div><p className="text-xs text-gray-400 mb-2">Design</p>
-              <img src={order.designUrl} alt="Design" className="max-h-40 rounded-xl object-contain bg-gray-50 p-2 w-full" /></div>
+              <img src={order.designUrl} alt="Design" className="max-h-40 rounded-xl object-contain bg-zinc-800 p-2 w-full" /></div>
           )}
           <div>
             <p className="text-xs text-gray-400 mb-2">Status</p>
             <div className="grid grid-cols-2 gap-2">
               {Object.keys(CUSTOM_STATUS).map(s => (
                 <button key={s} onClick={() => setStatus(s as any)}
-                  className={`py-2 rounded-lg text-xs font-bold border-2 transition-all ${status === s ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}>
+                  className={`py-2 rounded-lg text-xs font-bold border-2 transition-all ${status === s ? "bg-[#E63946] text-white border-[#E63946]" : "border-zinc-700 text-gray-300 hover:border-white"}`}>
                   {CUSTOM_STATUS[s]!.label}
                 </button>
               ))}
@@ -165,7 +165,7 @@ function OrderModal({ order, onClose, isRTL, onUpdate }: {
           <div>
             <p className="text-xs text-gray-400 mb-1">Admin Notes</p>
             <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3}
-              className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-black focus:outline-none resize-none" />
+              className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none resize-none bg-zinc-800 text-white placeholder:text-gray-500" />
           </div>
           <button onClick={handleSave} disabled={saving}
             className="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2">
@@ -207,20 +207,25 @@ function ProductModal({ product, onClose, onSaved }: {
   };
   const removeImg = (i: number) => set("images", form.images.filter((_, idx) => idx !== i));
 
-  const uploadFile = async (file: File) => {
+  const uploadFiles = async (files: FileList) => {
+    if (!files.length) return;
     setUploading(true); setError("");
     try {
-      const fd = new FormData();
-      fd.append("image", file);
       const token = localStorage.getItem("seen_access_token");
-      const res = await fetch("/api/admin/upload/image", {
-        method: "POST",
-        headers: token ? { "Authorization": `Bearer ${token}` } : {},
-        body: fd,
+      const uploads = Array.from(files).map(async (file) => {
+        const fd = new FormData();
+        fd.append("image", file);
+        const res = await fetch("/api/admin/upload/image", {
+          method: "POST",
+          headers: token ? { "Authorization": `Bearer ${token}` } : {},
+          body: fd,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Upload failed");
+        return data.url as string;
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Upload failed");
-      set("images", [...form.images, data.url]);
+      const urls = await Promise.all(uploads);
+      set("images", [...form.images, ...urls]);
     } catch (e: any) { setError(e.message); }
     finally { setUploading(false); }
   };
@@ -265,7 +270,7 @@ function ProductModal({ product, onClose, onSaved }: {
       className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <motion.div initial={{ scale: 0.92, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.92 }}
         onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+        className="bg-zinc-900 text-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
 
         {/* Header */}
         <div className="bg-black text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
@@ -274,19 +279,19 @@ function ProductModal({ product, onClose, onSaved }: {
         </div>
 
         <div className="overflow-y-auto flex-1 p-6 space-y-5">
-          {error && <p className="text-red-600 text-sm bg-red-50 rounded-xl p-3">{error}</p>}
+          {error && <p className="text-red-400 text-sm bg-red-900/30 rounded-xl p-3">{error}</p>}
 
           {/* Names */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Name (EN) *</label>
               <input value={form.name} onChange={e => set("name", e.target.value)} placeholder="Product name"
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Name (AR)</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">Name (AR)</label>
               <input value={form.nameAr} onChange={e => set("nameAr", e.target.value)} placeholder="اسم المنتج" dir="rtl"
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
             </div>
           </div>
 
@@ -295,17 +300,17 @@ function ProductModal({ product, onClose, onSaved }: {
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Price (EGP) *</label>
               <input type="number" value={form.price} onChange={e => set("price", e.target.value)} placeholder="299" min={1}
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Original Price</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">Original Price</label>
               <input type="number" value={form.originalPrice} onChange={e => set("originalPrice", e.target.value)} placeholder="399" min={1}
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Badge</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">Badge</label>
               <select value={form.badge} onChange={e => set("badge", e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none bg-white">
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white">
                 <option value="">None</option>
                 <option value="NEW">NEW</option>
                 <option value="SALE">SALE</option>
@@ -318,14 +323,14 @@ function ProductModal({ product, onClose, onSaved }: {
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Category *</label>
               <select value={form.category} onChange={e => set("category", e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none bg-white">
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white">
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Season</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">Season</label>
               <select value={form.season} onChange={e => set("season", e.target.value)}
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none bg-white">
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white">
                 <option value="">— No Season —</option>
                 <option value="summer">☀️ Summer</option>
                 <option value="winter">❄️ Winter</option>
@@ -350,7 +355,7 @@ function ProductModal({ product, onClose, onSaved }: {
             <div className="flex flex-wrap gap-2">
               {SIZE_OPTIONS.map(s => (
                 <button key={s} type="button" onClick={() => toggleSize(s)}
-                  className={`px-3 py-1.5 rounded-lg text-sm border-2 font-medium transition-all ${form.sizes.includes(s) ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm border-2 font-medium transition-all ${form.sizes.includes(s) ? "bg-[#E63946] text-white border-[#E63946]" : "border-zinc-700 text-gray-300 hover:border-white hover:text-white"}`}>
                   {s}
                 </button>
               ))}
@@ -361,7 +366,7 @@ function ProductModal({ product, onClose, onSaved }: {
           <div>
             <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Colors (comma-separated)</label>
             <input value={form.colors} onChange={e => set("colors", e.target.value)} placeholder="Black, White, Grey, Navy"
-              className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+              className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
           </div>
 
           {/* Description */}
@@ -369,12 +374,12 @@ function ProductModal({ product, onClose, onSaved }: {
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Description (EN)</label>
               <textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} placeholder="Product description..."
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-black focus:outline-none resize-none" />
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none resize-none bg-zinc-800 text-white placeholder:text-gray-500" />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Description (AR)</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase mb-1 block">Description (AR)</label>
               <textarea value={form.descriptionAr} onChange={e => set("descriptionAr", e.target.value)} rows={3} placeholder="وصف المنتج..." dir="rtl"
-                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-black focus:outline-none resize-none" />
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none resize-none bg-zinc-800 text-white placeholder:text-gray-500" />
             </div>
           </div>
 
@@ -388,7 +393,7 @@ function ProductModal({ product, onClose, onSaved }: {
             {form.images.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {form.images.map((url, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-200 group">
+                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-zinc-700 group">
                     <img src={url} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }} />
                     <button onClick={() => removeImg(i)}
                       className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -403,26 +408,26 @@ function ProductModal({ product, onClose, onSaved }: {
             <div className="flex gap-2 mb-2">
               <input value={urlInput} onChange={e => setUrlInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addUrl()}
                 placeholder="Paste image URL..." type="url"
-                className="flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-black focus:outline-none" />
-              <button onClick={addUrl} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-semibold transition-colors">
+                className="flex-1 border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
+              <button onClick={addUrl} className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-xl text-sm font-semibold transition-colors text-white">
                 Add URL
               </button>
             </div>
 
             {/* Upload file */}
-            <input ref={fileRef} type="file" accept="image/*" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = ""; }} />
+            <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+              onChange={e => { const files = e.target.files; if (files?.length) uploadFiles(files); e.target.value = ""; }} />
             <button onClick={() => fileRef.current?.click()} disabled={uploading}
-              className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 hover:border-black rounded-xl text-sm font-semibold text-gray-600 hover:text-black transition-all w-full justify-center disabled:opacity-50">
+              className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-zinc-600 hover:border-[#E63946] rounded-xl text-sm font-semibold text-gray-400 hover:text-white transition-all w-full justify-center disabled:opacity-50">
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              {uploading ? "Uploading..." : "Upload Image File"}
+              {uploading ? "Uploading..." : "Upload Images (select multiple)"}
             </button>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 flex gap-3 flex-shrink-0">
-          <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-gray-200 font-semibold text-sm hover:bg-gray-50 transition-colors">Cancel</button>
+        <div className="p-4 border-t border-zinc-800 flex gap-3 flex-shrink-0">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border-2 border-zinc-700 font-semibold text-sm text-gray-300 hover:bg-zinc-800 transition-colors">Cancel</button>
           <button onClick={handleSave} disabled={saving}
             className="flex-1 py-3 rounded-xl bg-black text-white font-bold text-sm hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -633,12 +638,12 @@ export default function AdminPage() {
           <h1 className="font-heading text-3xl font-bold">Admin Login</h1>
           <p className="text-gray-500 text-sm mt-2">Sign in with your admin account</p>
         </div>
-        {loginError && <p className="text-red-600 text-sm bg-red-50 rounded-lg p-3 mb-4 text-center">{loginError}</p>}
+        {loginError && <p className="text-red-400 text-sm bg-red-900/30 rounded-lg p-3 mb-4 text-center">{loginError}</p>}
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="Admin email" required
-            className="w-full border-2 border-gray-200 rounded-xl px-5 py-4 focus:outline-none focus:border-black transition-colors" />
+            className="w-full border-2 border-zinc-700 rounded-xl px-5 py-4 focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500" />
           <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="Password" required
-            className="w-full border-2 border-gray-200 rounded-xl px-5 py-4 focus:outline-none focus:border-black transition-colors" />
+            className="w-full border-2 border-zinc-700 rounded-xl px-5 py-4 focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500" />
           <button type="submit" disabled={loginLoading}
             className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2">
             {loginLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
@@ -673,9 +678,9 @@ export default function AdminPage() {
   ] as { key: Tab; label: string; icon: any }[];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0d0d0d] text-white">
       {/* Header */}
-      <div className="bg-black text-white px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+      <div className="bg-black border-b border-zinc-800 text-white px-6 py-4 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <ShieldCheck className="w-6 h-6 text-[#E63946]" />
           <span className="font-heading font-bold text-lg">SEENSTORE ADMIN</span>
@@ -690,10 +695,10 @@ export default function AdminPage() {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-56 bg-white border-r border-gray-100 min-h-[calc(100vh-56px)] p-4 hidden md:block sticky top-14 self-start">
+        <aside className="w-56 bg-zinc-900 border-r border-zinc-800 min-h-[calc(100vh-56px)] p-4 hidden md:block sticky top-14 self-start">
           {SIDEBAR_TABS.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => { setTab(key); setPage(1); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold mb-1 transition-all ${tab === key ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50"}`}>
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold mb-1 transition-all ${tab === key ? "bg-[#E63946] text-white" : "text-gray-400 hover:bg-zinc-800"}`}>
               <Icon className="w-4 h-4" />
               {label}
             </button>
@@ -701,10 +706,10 @@ export default function AdminPage() {
         </aside>
 
         {/* Mobile bottom tab bar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex z-30">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-800 flex z-30">
           {SIDEBAR_TABS.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => { setTab(key); setPage(1); }}
-              className={`flex-1 flex flex-col items-center py-3 gap-0.5 text-[10px] font-semibold transition-colors ${tab === key ? "text-[#E63946]" : "text-gray-400"}`}>
+              className={`flex-1 flex flex-col items-center py-3 gap-0.5 text-[10px] font-semibold transition-colors ${tab === key ? "text-[#E63946]" : "text-gray-500"}`}>
               <Icon className="w-5 h-5" />
               {label}
             </button>
@@ -720,16 +725,16 @@ export default function AdminPage() {
               <h2 className="font-heading text-2xl font-bold mb-6">Dashboard</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {[
-                  { label: "Total Users",     value: stats.totalUsers,          icon: Users,      color: "bg-blue-50 text-blue-600"    },
-                  { label: "Total Products",  value: stats.totalProducts,       icon: Store,      color: "bg-indigo-50 text-indigo-600" },
-                  { label: "Custom Orders",   value: stats.totalCustomOrders,   icon: Palette,    color: "bg-purple-50 text-purple-600" },
-                  { label: "Pending Orders",  value: stats.pendingCustomOrders, icon: Clock,      color: "bg-yellow-50 text-yellow-600" },
-                  { label: "New Users/Week",  value: stats.newUsersWeek,        icon: Users,      color: "bg-cyan-50 text-cyan-600"     },
-                  { label: "Products in Stock",value: stats.productsInStock,    icon: Package,    color: "bg-green-50 text-green-600"   },
-                  { label: "Regular Orders",  value: stats.totalOrders,         icon: ShoppingBag,color: "bg-orange-50 text-orange-600" },
-                  { label: "Revenue (EGP)",   value: stats.totalRevenue,        icon: TrendingUp, color: "bg-emerald-50 text-emerald-600"},
+                  { label: "Total Users",     value: stats.totalUsers,          icon: Users,      color: "bg-blue-900/40 text-blue-400"    },
+                  { label: "Total Products",  value: stats.totalProducts,       icon: Store,      color: "bg-indigo-900/40 text-indigo-400" },
+                  { label: "Custom Orders",   value: stats.totalCustomOrders,   icon: Palette,    color: "bg-purple-900/40 text-purple-400" },
+                  { label: "Pending Orders",  value: stats.pendingCustomOrders, icon: Clock,      color: "bg-yellow-900/40 text-yellow-400" },
+                  { label: "New Users/Week",  value: stats.newUsersWeek,        icon: Users,      color: "bg-cyan-900/40 text-cyan-400"     },
+                  { label: "Products in Stock",value: stats.productsInStock,    icon: Package,    color: "bg-green-900/40 text-green-400"   },
+                  { label: "Regular Orders",  value: stats.totalOrders,         icon: ShoppingBag,color: "bg-orange-900/40 text-orange-400" },
+                  { label: "Revenue (EGP)",   value: stats.totalRevenue,        icon: TrendingUp, color: "bg-emerald-900/40 text-emerald-400"},
                 ].map(({ label, value, icon: Icon, color }) => (
-                  <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                  <div key={label} className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}>
                       <Icon className="w-5 h-5" />
                     </div>
@@ -747,7 +752,7 @@ export default function AdminPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-heading text-2xl font-bold">Products</h2>
                 <div className="flex gap-2">
-                  <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                     <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                   </button>
                   <button onClick={() => setEditProduct(null)}
@@ -757,14 +762,14 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {error && <p className="text-red-600 bg-red-50 rounded-xl p-4 mb-4 text-sm">{error}</p>}
+              {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
 
               {loading ? (
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
               ) : products.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-20 bg-zinc-900 rounded-2xl border border-zinc-800">
                   <Store className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">No products yet</p>
                   <button onClick={() => setEditProduct(null)} className="mt-4 bg-black text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#E63946] transition-colors">
@@ -772,19 +777,19 @@ export default function AdminPage() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                      <thead className="bg-zinc-800 text-gray-400 text-xs uppercase tracking-wider">
                         <tr>
                           {["", "Name", "Price", "Category", "Badge", "Sizes", "Stock", ""].map((h, i) => (
                             <th key={i} className="px-4 py-3 text-left font-semibold">{h}</th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-zinc-800">
                         {products.map(p => (
-                          <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={p.id} className="hover:bg-zinc-800/60 transition-colors">
                             <td className="px-4 py-3">
                               <div className="w-12 h-14 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                                 <img src={p.images[0] ?? PLACEHOLDER} alt={p.name}
@@ -842,32 +847,32 @@ export default function AdminPage() {
                   <h2 className="font-heading text-2xl font-bold">Orders</h2>
                   {stats && <p className="text-sm text-gray-500 mt-1">{stats.totalOrders} total orders · {stats.totalRevenue.toLocaleString()} EGP revenue</p>}
                 </div>
-                <button onClick={fetchOrders} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <button onClick={fetchOrders} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                   <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 </button>
               </div>
-              {error && <p className="text-red-600 bg-red-50 rounded-xl p-4 mb-4 text-sm">{error}</p>}
+              {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
               {loading ? (
                 <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
               ) : orders.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-20 bg-zinc-900 rounded-2xl border border-zinc-800">
                   <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">No orders yet</p>
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                      <thead className="bg-zinc-800 text-gray-400 text-xs uppercase tracking-wider">
                         <tr>{["Order ID", "Customer", "Total / Deposit", "Payment Proof", "Status", "Date"].map(h => (
                           <th key={h} className="px-4 py-3 text-left font-semibold">{h}</th>
                         ))}</tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-zinc-800">
                         {orders.map(order => {
                           const cfg = ORDER_STATUS[order.status] ?? ORDER_STATUS["pending"]!;
                           return (
-                            <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={order.id} className="hover:bg-zinc-800/60 transition-colors">
                               <td className="px-4 py-3">
                                 <p className="font-mono font-bold text-[#E63946] text-xs">{order.id}</p>
                                 {order.couponCode && <p className="text-green-600 text-xs mt-0.5">🏷 {order.couponCode} (−{order.couponDiscount} EGP)</p>}
@@ -919,11 +924,11 @@ export default function AdminPage() {
                     </table>
                   </div>
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-zinc-800">
                       <p className="text-sm text-gray-500">Page {page} of {totalPages} · {total} total</p>
                       <div className="flex gap-2">
-                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
-                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
+                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-zinc-700 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
+                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-2 rounded-lg hover:bg-zinc-700 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -937,40 +942,40 @@ export default function AdminPage() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="font-heading text-2xl font-bold">Custom Orders</h2>
-                <button onClick={fetchCustomOrders} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <button onClick={fetchCustomOrders} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                   <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 </button>
               </div>
               <div className="flex gap-2 flex-wrap mb-6">
                 {["all", "pending", "processing", "done", "cancelled"].map(s => (
                   <button key={s} onClick={() => { setFilterStatus(s); setPage(1); }}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterStatus === s ? "bg-black text-white" : "bg-white text-gray-600 border border-gray-200 hover:border-black"}`}>
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterStatus === s ? "bg-[#E63946] text-white" : "bg-zinc-800 text-gray-300 border border-zinc-700 hover:border-zinc-400"}`}>
                     {s === "all" ? "All" : CUSTOM_STATUS[s]!.label}
                   </button>
                 ))}
               </div>
-              {error && <p className="text-red-600 bg-red-50 rounded-xl p-4 mb-4 text-sm">{error}</p>}
+              {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
               {loading ? (
                 <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
               ) : customOrders.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-20 bg-zinc-900 rounded-2xl border border-zinc-800">
                   <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">No orders found</p>
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                      <thead className="bg-zinc-800 text-gray-400 text-xs uppercase tracking-wider">
                         <tr>{["Order ID", "Customer", "Item", "Size", "Date", "Status", ""].map(h => (
                           <th key={h} className="px-4 py-3 text-left font-semibold">{h}</th>
                         ))}</tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-zinc-800">
                         {customOrders.map(order => {
                           const cfg = CUSTOM_STATUS[order.status] ?? CUSTOM_STATUS["pending"]!;
                           return (
-                            <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={order.id} className="hover:bg-zinc-800/60 transition-colors">
                               <td className="px-4 py-3 font-mono font-bold text-[#E63946] text-xs">{order.id}</td>
                               <td className="px-4 py-3">
                                 <p className="font-semibold">{order.customerName}</p>
@@ -995,11 +1000,11 @@ export default function AdminPage() {
                     </table>
                   </div>
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-zinc-800">
                       <p className="text-sm text-gray-500">Page {page} of {totalPages} · {total} total</p>
                       <div className="flex gap-2">
-                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
-                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
+                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-zinc-700 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
+                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-2 rounded-lg hover:bg-zinc-700 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -1020,25 +1025,25 @@ export default function AdminPage() {
                     </p>
                   )}
                 </div>
-                <button onClick={fetchUsers} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <button onClick={fetchUsers} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                   <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 </button>
               </div>
-              {error && <p className="text-red-600 bg-red-50 rounded-xl p-4 mb-4 text-sm">{error}</p>}
+              {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
               {loading ? (
                 <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
               ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                      <thead className="bg-zinc-800 text-gray-400 text-xs uppercase tracking-wider">
                         <tr>{["Name", "Email", "Role", "Phone", "Joined", "Actions"].map(h => (
                           <th key={h} className="px-4 py-3 text-left font-semibold">{h}</th>
                         ))}</tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-zinc-800">
                         {users.map(u => (
-                          <tr key={u.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={u.id} className="hover:bg-zinc-800/60 transition-colors">
                             <td className="px-4 py-3 font-semibold">{u.name}</td>
                             <td className="px-4 py-3 text-gray-600">{u.email}</td>
                             <td className="px-4 py-3">
@@ -1072,11 +1077,11 @@ export default function AdminPage() {
                     </table>
                   </div>
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-zinc-800">
                       <p className="text-sm text-gray-500">Page {page} of {totalPages} · {total} total</p>
                       <div className="flex gap-2">
-                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
-                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
+                        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 rounded-lg hover:bg-zinc-700 disabled:opacity-40"><ChevronLeft className="w-4 h-4" /></button>
+                        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-2 rounded-lg hover:bg-zinc-700 disabled:opacity-40"><ChevronRight className="w-4 h-4" /></button>
                       </div>
                     </div>
                   )}
@@ -1093,7 +1098,7 @@ export default function AdminPage() {
                   <p className="text-sm text-gray-500 mt-1">{coupons.length} coupon{coupons.length !== 1 ? "s" : ""}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={fetchCoupons} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button onClick={fetchCoupons} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                     <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                   </button>
                   <button onClick={() => { setCouponFormOpen(true); setCouponError(""); }}
@@ -1102,33 +1107,33 @@ export default function AdminPage() {
                   </button>
                 </div>
               </div>
-              {error && <p className="text-red-600 bg-red-50 rounded-xl p-4 mb-4 text-sm">{error}</p>}
+              {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
 
               {/* ── Add Coupon Form ── */}
               {couponFormOpen && (
-                <div className="bg-white rounded-2xl border-2 border-black shadow-sm p-6 mb-6">
+                <div className="bg-zinc-900 rounded-2xl border-2 border-[#E63946]/40 p-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-bold text-lg">New Coupon</h3>
                     <button onClick={() => setCouponFormOpen(false)}><X className="w-5 h-5 text-gray-400 hover:text-black" /></button>
                   </div>
-                  {couponError && <p className="text-red-600 bg-red-50 rounded-lg p-3 text-sm mb-4">{couponError}</p>}
+                  {couponError && <p className="text-red-400 bg-red-900/30 rounded-lg p-3 text-sm mb-4">{couponError}</p>}
                   <div className="grid md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Code *</label>
                       <input value={couponForm.code} onChange={e => setCouponForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
-                        placeholder="SEEN20" className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm font-mono focus:border-black focus:outline-none uppercase" />
+                        placeholder="SEEN20" className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm font-mono focus:border-[#E63946] focus:outline-none uppercase bg-zinc-800 text-white" />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Discount % *</label>
                       <input type="number" min={1} max={100} value={couponForm.discountRate}
                         onChange={e => setCouponForm(f => ({ ...f, discountRate: e.target.value }))}
-                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                        className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white" />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Max Uses (blank = unlimited)</label>
                       <input type="number" min={1} value={couponForm.maxUses}
                         onChange={e => setCouponForm(f => ({ ...f, maxUses: e.target.value }))}
-                        placeholder="∞" className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                        placeholder="∞" className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white" />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
@@ -1136,13 +1141,13 @@ export default function AdminPage() {
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Description</label>
                       <input value={couponForm.description} onChange={e => setCouponForm(f => ({ ...f, description: e.target.value }))}
                         placeholder="Optional note about this coupon"
-                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                        className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white" />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Expires At (optional)</label>
                       <input type="datetime-local" value={couponForm.expiresAt}
                         onChange={e => setCouponForm(f => ({ ...f, expiresAt: e.target.value }))}
-                        className="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:border-black focus:outline-none" />
+                        className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
@@ -1155,7 +1160,7 @@ export default function AdminPage() {
                     </label>
                     <div className="flex gap-3">
                       <button onClick={() => setCouponFormOpen(false)}
-                        className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+                        className="px-5 py-2.5 rounded-xl border-2 border-zinc-700 text-sm font-semibold text-gray-300 hover:bg-zinc-800 transition-colors">Cancel</button>
                       <button onClick={saveCoupon} disabled={couponSaving}
                         className="px-5 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-[#E63946] transition-colors flex items-center gap-2">
                         {couponSaving && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -1170,7 +1175,7 @@ export default function AdminPage() {
               {loading ? (
                 <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
               ) : coupons.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-20 bg-zinc-900 rounded-2xl border border-zinc-800">
                   <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 mb-4">No coupons yet</p>
                   <button onClick={() => setCouponFormOpen(true)} className="bg-black text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-[#E63946] transition-colors">
@@ -1178,19 +1183,19 @@ export default function AdminPage() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                      <thead className="bg-zinc-800 text-gray-400 text-xs uppercase tracking-wider">
                         <tr>{["Code", "Discount", "Description", "Uses", "Expires", "Status", ""].map(h => (
                           <th key={h} className="px-4 py-3 text-left font-semibold">{h}</th>
                         ))}</tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-zinc-800">
                         {coupons.map(c => (
-                          <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={c.id} className="hover:bg-zinc-800/60 transition-colors">
                             <td className="px-4 py-3">
-                              <span className="font-mono font-bold text-[#E63946] text-sm bg-red-50 px-2 py-1 rounded-lg">{c.code}</span>
+                              <span className="font-mono font-bold text-[#E63946] text-sm bg-[#E63946]/10 px-2 py-1 rounded-lg">{c.code}</span>
                             </td>
                             <td className="px-4 py-3 font-bold text-green-700">{c.discountRate}%</td>
                             <td className="px-4 py-3 text-gray-500 max-w-[180px] truncate">{c.description ?? "—"}</td>
@@ -1230,17 +1235,17 @@ export default function AdminPage() {
                   <h2 className="font-heading text-2xl font-bold">Contact Messages</h2>
                   <p className="text-sm text-gray-500 mt-1">{messages.length} messages</p>
                 </div>
-                <button onClick={fetchMessages} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <button onClick={fetchMessages} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                   <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 </button>
               </div>
-              {error && <p className="text-red-600 bg-red-50 rounded-xl p-4 mb-4 text-sm">{error}</p>}
+              {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
               {loading ? (
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
               ) : messages.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                <div className="text-center py-20 bg-zinc-900 rounded-2xl border border-zinc-800">
                   <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500">No messages yet</p>
                 </div>
@@ -1250,7 +1255,7 @@ export default function AdminPage() {
                   <div className="space-y-2">
                     {messages.map(msg => (
                       <button key={msg.id} onClick={() => { setActiveMsg(msg); setReplyText(""); }}
-                        className={`w-full text-left bg-white rounded-2xl border p-4 transition-all hover:shadow-sm ${activeMsg?.id === msg.id ? "border-black shadow-sm" : "border-gray-100"}`}>
+                        className={`w-full text-left bg-zinc-900 rounded-2xl border p-4 transition-all ${activeMsg?.id === msg.id ? "border-[#E63946]" : "border-zinc-800 hover:border-zinc-600"}`}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <p className="font-semibold text-sm truncate">{msg.name}</p>
@@ -1260,11 +1265,11 @@ export default function AdminPage() {
                           </div>
                           <div className="flex flex-col items-end gap-1 flex-shrink-0">
                             {msg.adminReply ? (
-                              <span className="flex items-center gap-1 text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
+                              <span className="flex items-center gap-1 text-[10px] text-green-400 bg-green-900/30 px-2 py-0.5 rounded-full font-medium">
                                 <CheckCircle2 className="w-3 h-3" /> Replied
                               </span>
                             ) : (
-                              <span className="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full font-medium">Pending</span>
+                              <span className="text-[10px] text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded-full font-medium">Pending</span>
                             )}
                             <span className="text-[10px] text-gray-400">{new Date(msg.createdAt).toLocaleDateString()}</span>
                           </div>
@@ -1275,7 +1280,7 @@ export default function AdminPage() {
 
                   {/* Message detail + reply */}
                   {activeMsg ? (
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4 sticky top-20 self-start">
+                    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5 space-y-4 sticky top-20 self-start">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-bold text-base">{activeMsg.name}</p>
@@ -1285,23 +1290,23 @@ export default function AdminPage() {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <div className="bg-gray-50 rounded-xl px-4 py-3">
+                      <div className="bg-zinc-800 rounded-xl px-4 py-3">
                         <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wider">{activeMsg.subject}</p>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{activeMsg.message}</p>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{activeMsg.message}</p>
                       </div>
                       {activeMsg.adminReply && (
-                        <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3">
-                          <p className="text-xs text-green-600 font-medium mb-1 flex items-center gap-1">
+                        <div className="bg-green-900/20 border border-green-800/40 rounded-xl px-4 py-3">
+                          <p className="text-xs text-green-400 font-medium mb-1 flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Your reply — {activeMsg.repliedAt ? new Date(activeMsg.repliedAt).toLocaleDateString() : ""}
                           </p>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">{activeMsg.adminReply}</p>
+                          <p className="text-sm text-gray-300 whitespace-pre-wrap">{activeMsg.adminReply}</p>
                         </div>
                       )}
                       <div>
                         <p className="text-xs text-gray-500 font-medium mb-2">{activeMsg.adminReply ? "Update reply" : "Write a reply"}</p>
                         <textarea value={replyText} onChange={e => setReplyText(e.target.value)} rows={4}
                           placeholder="Type your reply..."
-                          className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-black focus:outline-none resize-none transition-colors" />
+                          className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none resize-none transition-colors bg-zinc-800 text-white placeholder:text-gray-500" />
                         <button onClick={() => sendReply(activeMsg)} disabled={replying || !replyText.trim()}
                           className="mt-2 w-full bg-black text-white py-2.5 rounded-xl text-sm font-bold hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2 disabled:opacity-40">
                           {replying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Reply className="w-4 h-4" />}
@@ -1310,7 +1315,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="hidden lg:flex items-center justify-center text-gray-400 bg-white rounded-2xl border border-gray-100 py-20">
+                    <div className="hidden lg:flex items-center justify-center text-gray-400 bg-zinc-900 rounded-2xl border border-zinc-800 py-20">
                       <div className="text-center">
                         <MessageSquare className="w-10 h-10 mx-auto mb-3 text-gray-300" />
                         <p className="text-sm">Select a message to view and reply</p>

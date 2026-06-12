@@ -82,7 +82,7 @@ router.get("/admin/stats", requireAdmin, async (_req, res) => {
       (SELECT COUNT(*)::int FROM products)                                            AS "totalProducts",
       (SELECT COUNT(*)::int FROM products WHERE in_stock = true)                      AS "productsInStock",
       (SELECT COUNT(*)::int FROM users WHERE created_at > NOW() - INTERVAL '7 days') AS "newUsersWeek"
-  `)).rows[0] ?? {};
+  `))[0] ?? {};
   res.json(row);
 });
 
