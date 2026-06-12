@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "nix", "postgresql-16"]
+modules = ["nodejs-20", "web", "nix"]
 [nix]
 channel = "stable-25_05"
 
@@ -58,3 +58,7 @@ externalPort = 8080
 
 [userenv.shared]
 GOOGLE_REDIRECT_URI = "https://5c87c4eb-f367-42fc-895b-7df03ffab2cd-00-2n1v1cv51naj8.spock.replit.dev/api/auth/google/callback"
+NODE_ENV = "development"
+PORT = "8080"
+API_PORT = "8080"
+FRONTEND_URL = "https://5c87c4eb-f367-42fc-895b-7df03ffab2cd-00-2n1v1cv51naj8.spock.replit.dev"
