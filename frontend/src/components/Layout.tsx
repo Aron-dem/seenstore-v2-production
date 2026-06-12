@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, Heart, Search, Menu, X, ChevronRight, User, LogOut, Package } from "lucide-react";
 import { Toaster, toast } from "./ui/sonner";
-import { SiInstagram, SiTiktok, SiVisa, SiMastercard } from "react-icons/si";
+import { SiInstagram, SiTiktok, SiWhatsapp, SiVisa, SiMastercard } from "react-icons/si";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useLang } from "../context/LanguageContext";
@@ -305,6 +305,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </a>
                 <a href="https://www.tiktok.com/@seen.store.20?_r=1&_t=ZS-91yKwhOlbx1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
                   <SiTiktok className="w-4 h-4" />
+                </a>
+                <a href="https://wa.me/201018957428" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#25D366] hover:text-white transition-colors">
+                  <SiWhatsapp className="w-4 h-4" />
                 </a>
               </div>
             </div>
