@@ -303,11 +303,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <a href="https://www.instagram.com/seen_store.20?igsh=dmJveGU5ZWxvdjJ3&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
                   <SiInstagram className="w-4 h-4" />
                 </a>
-                {[SiTiktok, SiFacebook].map((Icon, i) => (
-                  <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
-                    <Icon className="w-4 h-4" />
-                  </a>
-                ))}
+                <a href="https://www.tiktok.com/@seen.store.20?_r=1&_t=ZS-91yKwhOlbx1" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
+                  <SiTiktok className="w-4 h-4" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
+                  <SiFacebook className="w-4 h-4" />
+                </a>
                 <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:bg-[#E63946] hover:text-white transition-colors">
                   <SiX className="w-3.5 h-3.5" />
                 </a>
