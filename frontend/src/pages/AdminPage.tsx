@@ -53,7 +53,7 @@ const INIT_FORM: ProductForm = {
   images: [], description: "", descriptionAr: "", inStock: true,
 };
 
-const CATEGORIES = ["T-Shirts", "Pants", "Hoodies", "Accessories"];
+const CATEGORIES = ["T-Shirts", "Pants", "Hoodies", "Accessories", "Summer Collection", "Winter Collection"];
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const CUSTOM_STATUS: Record<string, { label: string; color: string }> = {

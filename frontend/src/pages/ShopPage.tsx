@@ -8,9 +8,11 @@ import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
-  { label: "T-Shirts", labelAr: "تيشيرتات", keys: ["T-Shirts"] },
-  { label: "Hoodies",  labelAr: "هوديز",    keys: ["Hoodies"]  },
-  { label: "Pants",    labelAr: "بناطيل",   keys: ["Pants"]    },
+  { label: "T-Shirts",          labelAr: "تيشيرتات",        keys: ["T-Shirts"]          },
+  { label: "Hoodies",           labelAr: "هوديز",           keys: ["Hoodies"]           },
+  { label: "Pants",             labelAr: "بناطيل",          keys: ["Pants"]             },
+  { label: "Summer Collection", labelAr: "كولكشن الصيف",    keys: ["Summer Collection"] },
+  { label: "Winter Collection", labelAr: "كولكشن الشتاء",   keys: ["Winter Collection"] },
 ];
 const SIZES     = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLORS    = [
