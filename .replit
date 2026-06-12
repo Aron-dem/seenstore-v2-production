@@ -57,8 +57,8 @@ externalPort = 8080
 [userenv]
 
 [userenv.shared]
-GOOGLE_REDIRECT_URI = "https://5c87c4eb-f367-42fc-895b-7df03ffab2cd-00-2n1v1cv51naj8.spock.replit.dev/api/auth/google/callback"
+GOOGLE_REDIRECT_URI = "https://d9a1c11a-4740-466e-a341-8f1e7d79f412-00-33ybzw8hpz72l.picard.replit.dev/api/auth/google/callback"
 NODE_ENV = "development"
 PORT = "8080"
 API_PORT = "8080"
-FRONTEND_URL = "https://5c87c4eb-f367-42fc-895b-7df03ffab2cd-00-2n1v1cv51naj8.spock.replit.dev"
+FRONTEND_URL = "https://d9a1c11a-4740-466e-a341-8f1e7d79f412-00-33ybzw8hpz72l.picard.replit.dev"
