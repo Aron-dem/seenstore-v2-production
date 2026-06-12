@@ -17,10 +17,18 @@ async function uploadToStorage(buffer: Buffer, originalname: string, mimetype: s
   const ext        = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "");
   const objectName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  // ── Supabase Storage (production / Vercel) ──────────────────────────────────
+  // ── Supabase Storage ────────────────────────────────────────────────────────
   if (supabaseUrl && supabaseKey) {
     const { createClient } = await import("@supabase/supabase-js");
     const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+
+    // Auto-create bucket if it doesn't exist
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(b => b.name === "product-images");
+    if (!bucketExists) {
+      await supabase.storage.createBucket("product-images", { public: true });
+    }
+
     const { error } = await supabase.storage
       .from("product-images")
       .upload(objectName, buffer, { contentType: mimetype, upsert: false });
