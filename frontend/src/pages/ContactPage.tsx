@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Phone, Clock, Send, Loader2 } from "lucide-react";
+import { Mail, Phone, Clock, Send } from "lucide-react";
 import { SiInstagram, SiTiktok } from "react-icons/si";
 import { useLang } from "../context/LanguageContext";
 import { useSEO } from "../hooks/useSEO";
@@ -21,26 +21,14 @@ export default function ContactPage() {
   const isAr = lang === "ar";
 
   const [form,     setForm]     = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent,     setSent]     = useState(false);
-  const [sending,  setSending]  = useState(false);
-  const [sendError, setSendError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSending(true); setSendError("");
-    try {
-      const res = await fetch("/api/messages", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setSent(true);
-    } catch {
-      setSendError(isAr ? "حدث خطأ، حاول مجدداً." : "Something went wrong, please try again.");
-    } finally {
-      setSending(false);
-    }
+    const message = isAr
+      ? `مرحباً SEENSTORE 👋\n\nالاسم: ${form.name}\nالبريد: ${form.email}\nالموضوع: ${form.subject}\n\nالرسالة:\n${form.message}`
+      : `Hello SEENSTORE 👋\n\nName: ${form.name}\nEmail: ${form.email}\nSubject: ${form.subject}\n\nMessage:\n${form.message}`;
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/201018957428?text=${encoded}`, "_blank");
   };
 
   return (
@@ -106,57 +94,40 @@ export default function ContactPage() {
 
         {/* Form */}
         <div className="lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm p-8 text-white">
-          {sent ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send className="w-7 h-7 text-green-600" />
-              </div>
-              <h3 className="font-heading font-bold text-2xl mb-2">
-                {isAr ? "تم الإرسال!" : "Message Sent!"}
-              </h3>
-              <p className="text-gray-400">
-                {isAr ? "شكراً لتواصلك معنا. سنرد عليك خلال 24 ساعة." : "Thanks for reaching out. We'll get back to you within 24 hours."}
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <h2 className="font-heading font-bold text-xl mb-6">{isAr ? "أرسل لنا رسالة" : "Send us a message"}</h2>
-              {sendError && (
-                <p className="text-red-400 text-sm bg-red-900/30 rounded-xl px-4 py-3">{sendError}</p>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الاسم" : "Name"}</label>
-                  <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
-                    placeholder={isAr ? "اسمك الكامل" : "Your full name"} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "البريد الإلكتروني" : "Email"}</label>
-                  <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                    className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
-                    placeholder={isAr ? "بريدك الإلكتروني" : "your@email.com"} />
-                </div>
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <h2 className="font-heading font-bold text-xl mb-6">{isAr ? "أرسل لنا رسالة" : "Send us a message"}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الموضوع" : "Subject"}</label>
-                <input required value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
+                <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الاسم" : "Name"}</label>
+                <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
-                  placeholder={isAr ? "موضوع رسالتك" : "What's this about?"} />
+                  placeholder={isAr ? "اسمك الكامل" : "Your full name"} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الرسالة" : "Message"}</label>
-                <textarea required rows={5} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                  className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors resize-none placeholder:text-gray-500"
-                  placeholder={isAr ? "اكتب رسالتك هنا..." : "Write your message here..."} />
+                <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "البريد الإلكتروني" : "Email"}</label>
+                <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
+                  placeholder={isAr ? "بريدك الإلكتروني" : "your@email.com"} />
               </div>
-              <button type="submit" disabled={sending}
-                className="w-full bg-[#E63946] text-white py-4 rounded-xl font-bold hover:bg-black transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                {isAr ? "إرسال الرسالة" : "Send Message"}
-              </button>
-            </form>
-          )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الموضوع" : "Subject"}</label>
+              <input required value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
+                className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors placeholder:text-gray-500"
+                placeholder={isAr ? "موضوع رسالتك" : "What's this about?"} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">{isAr ? "الرسالة" : "Message"}</label>
+              <textarea required rows={5} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+                className="w-full border-2 border-zinc-700 bg-zinc-800 text-white rounded-xl px-4 py-3 text-sm focus:border-[#E63946] focus:outline-none transition-colors resize-none placeholder:text-gray-500"
+                placeholder={isAr ? "اكتب رسالتك هنا..." : "Write your message here..."} />
+            </div>
+            <button type="submit"
+              className="w-full bg-[#E63946] text-white py-4 rounded-xl font-bold hover:bg-black transition-colors flex items-center justify-center gap-2">
+              <Send className="w-4 h-4" />
+              {isAr ? "إرسال عبر واتساب" : "Send via WhatsApp"}
+            </button>
+          </form>
         </div>
       </div>
     </div>

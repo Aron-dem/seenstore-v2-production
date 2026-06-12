@@ -341,9 +341,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div id="contact">
               <h4 className="font-heading font-semibold text-lg text-white mb-6">{t.footer.contact}</h4>
               <ul className="space-y-4 text-sm text-gray-400">
-                <li>Email: hello@seenstore.com</li>
-                <li>Phone: +20 123 456 7890</li>
-                <li>{isRTL ? "١٢٣ شارع الحضري، القاهرة، مصر" : "123 Urban Street, Cairo, Egypt"}</li>
+                <li><a href="mailto:seenstore329@gmail.com" className="hover:text-[#E63946] transition-colors">seenstore329@gmail.com</a></li>
+                <li><a href="https://wa.me/201018957428" target="_blank" rel="noopener noreferrer" className="hover:text-[#E63946] transition-colors">01018957428</a></li>
               </ul>
             </div>
 

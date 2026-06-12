@@ -1,4 +1,13 @@
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [location]);
+  return null;
+}
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -32,6 +41,7 @@ export default function App() {
       <CartProvider>
       <CustomOrdersProvider>
         <Layout>
+          <ScrollToTop />
           <Switch>
             <Route path="/" component={HomePage} />
             <Route path="/shop" component={ShopPage} />
