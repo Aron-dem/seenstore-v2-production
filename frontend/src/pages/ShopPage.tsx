@@ -7,7 +7,10 @@ import { ShoppingBag, Heart, Filter, Grid, List, X, Check, Loader2 } from "lucid
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 
-const CATEGORIES = ["T-Shirts", "Pants", "Hoodies"];
+const CATEGORIES = [
+  { label: "Summer Collection", labelAr: "كولكشن الصيف",  keys: ["T-Shirts"] },
+  { label: "Winter Collection", labelAr: "كولكشن الشتاء", keys: ["Pants", "Hoodies"] },
+];
 const SIZES     = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLORS    = [
   { name: "Black",  hex: "#000000" },
@@ -63,15 +66,19 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
       <div>
         <h3 className="font-heading font-bold text-base mb-4 uppercase tracking-wide">{labels.categories}</h3>
         <div className="space-y-3">
-          {CATEGORIES.map(c => (
-            <button key={c} type="button" onClick={() => onToggleCat(c)} className="flex items-center gap-3 w-full group text-left">
-              <span className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selectedCats.includes(c) ? "bg-[#E63946] border-[#E63946]" : "border-zinc-600 group-hover:border-[#E63946]"}`}>
-                {selectedCats.includes(c) && <Check className="w-3 h-3 text-white" />}
-              </span>
-              <span className={`text-sm transition-colors ${selectedCats.includes(c) ? "font-semibold text-white" : "text-gray-400 group-hover:text-white"}`}>{c}</span>
-              <span className="ml-auto text-xs text-gray-500">{products.filter(p => p.category === c).length}</span>
-            </button>
-          ))}
+          {CATEGORIES.map(cat => {
+            const active = cat.keys.every(k => selectedCats.includes(k));
+            const count  = products.filter(p => cat.keys.includes(p.category)).length;
+            return (
+              <button key={cat.label} type="button" onClick={() => onToggleCat(cat.label)} className="flex items-center gap-3 w-full group text-left">
+                <span className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${active ? "bg-[#E63946] border-[#E63946]" : "border-zinc-600 group-hover:border-[#E63946]"}`}>
+                  {active && <Check className="w-3 h-3 text-white" />}
+                </span>
+                <span className={`text-sm transition-colors ${active ? "font-semibold text-white" : "text-gray-400 group-hover:text-white"}`}>{isRTL ? cat.labelAr : cat.label}</span>
+                <span className="ml-auto text-xs text-gray-500">{count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
       <div>
@@ -85,8 +92,8 @@ function FilterSidebar({ products, selectedCats, selectedSizes, selectedColors, 
           <div className="absolute left-0 h-1.5 rounded-full bg-[#E63946]" style={{ width: `${pct}%` }} />
           <input
             type="range" min={0} max={2000} step={50}
-            value={isRTL ? 2000 - priceRange : priceRange}
-            onChange={e => onPriceChange(isRTL ? 2000 - Number(e.target.value) : Number(e.target.value))}
+            value={priceRange}
+            onChange={e => onPriceChange(Number(e.target.value))}
             className="absolute inset-0 w-full opacity-0 cursor-pointer h-6" style={{ zIndex: 2 }}
           />
           <div className="absolute w-5 h-5 rounded-full bg-[#E63946] shadow-md border-2 border-zinc-950 pointer-events-none transition-all" style={{ left: `calc(${pct}% - 10px)`, zIndex: 1 }} />
@@ -162,6 +169,17 @@ export default function ShopPage() {
     setter(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]);
   }, []);
 
+  const toggleCat = useCallback((catLabel: string) => {
+    const cat = CATEGORIES.find(c => c.label === catLabel);
+    if (!cat) return;
+    setSelectedCats(prev => {
+      const allSelected = cat.keys.every(k => prev.includes(k));
+      return allSelected
+        ? prev.filter(k => !cat.keys.includes(k))
+        : [...prev.filter(k => !cat.keys.includes(k)), ...cat.keys];
+    });
+  }, []);
+
   const clearAll = useCallback(() => {
     setSelectedCats([]); setSelectedSizes([]); setSelectedColors([]); setPriceRange(2000);
   }, []);
@@ -183,7 +201,7 @@ export default function ShopPage() {
   const sidebarLabels = { clearAll: t.shop.clearAll, categories: t.shop.categories, priceRange: t.shop.priceRange, size: t.shop.size, color: t.shop.color };
   const sidebarProps: SidebarProps = {
     products, selectedCats, selectedSizes, selectedColors, priceRange, isRTL,
-    onToggleCat:   (v) => toggle(setSelectedCats, v),
+    onToggleCat:   toggleCat,
     onToggleSize:  (v) => toggle(setSelectedSizes, v),
     onToggleColor: (v) => toggle(setSelectedColors, v),
     onPriceChange: setPriceRange,

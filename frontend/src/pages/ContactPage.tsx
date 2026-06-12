@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, Send, Loader2 } from "lucide-react";
-import { SiInstagram, SiTiktok, SiFacebook } from "react-icons/si";
+import { Mail, Phone, Clock, Send, Loader2 } from "lucide-react";
+import { SiInstagram, SiTiktok } from "react-icons/si";
 import { useLang } from "../context/LanguageContext";
 import { useSEO } from "../hooks/useSEO";
 
@@ -57,31 +57,49 @@ export default function ContactPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
         {/* Info */}
         <div className="lg:col-span-2 space-y-6">
-          {[
-            { icon: Mail,  title: isAr ? "البريد الإلكتروني" : "Email",         value: "hello@seenstore.com" },
-            { icon: Phone, title: isAr ? "الهاتف" : "Phone",                    value: "+20 123 456 7890" },
-            { icon: MapPin,title: isAr ? "العنوان" : "Address",                 value: isAr ? "١٢٣ شارع الحضري، القاهرة، مصر" : "123 Urban Street, Cairo, Egypt" },
-            { icon: Clock, title: isAr ? "ساعات العمل" : "Working Hours",       value: isAr ? "السبت – الخميس، ١٠ص – ٧م" : "Sat – Thu, 10 AM – 7 PM" },
-          ].map((item, i) => (
-            <div key={i} className="flex gap-4">
-              <div className="w-12 h-12 bg-[#E63946]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <item.icon className="w-5 h-5 text-[#E63946]" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wider">{item.title}</p>
-                <p className="font-medium">{item.value}</p>
-              </div>
+          <div className="flex gap-4">
+            <div className="w-12 h-12 bg-[#E63946]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Mail className="w-5 h-5 text-[#E63946]" />
             </div>
-          ))}
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wider">{isAr ? "البريد الإلكتروني" : "Email"}</p>
+              <a href="mailto:hello@seenstore.com" className="font-medium hover:text-[#E63946] transition-colors">hello@seenstore.com</a>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="w-12 h-12 bg-[#E63946]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Phone className="w-5 h-5 text-[#E63946]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wider">{isAr ? "واتساب" : "WhatsApp"}</p>
+              <a href="https://wa.me/201018957428" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-[#E63946] transition-colors">
+                01018957428
+              </a>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="w-12 h-12 bg-[#E63946]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Clock className="w-5 h-5 text-[#E63946]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5 font-medium uppercase tracking-wider">{isAr ? "ساعات العمل" : "Working Hours"}</p>
+              <p className="font-medium">{isAr ? "السبت – الخميس، ١٠ص – ٧م" : "Sat – Thu, 10 AM – 7 PM"}</p>
+            </div>
+          </div>
 
           <div className="pt-6 border-t border-zinc-800">
             <p className="text-sm text-gray-500 mb-4">{isAr ? "تابعنا على" : "Follow us on"}</p>
             <div className="flex gap-3">
-              {[SiInstagram, SiTiktok, SiFacebook].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 hover:bg-[#E63946] hover:text-white transition-colors">
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
+              <a href="https://instagram.com/seen_store.20" target="_blank" rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 hover:bg-[#E63946] hover:text-white transition-colors">
+                <SiInstagram className="w-4 h-4" />
+              </a>
+              <a href="https://www.tiktok.com/@seen.store.20?_r=1&_t=ZS-91yKwhOlbx1" target="_blank" rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-gray-400 hover:bg-[#E63946] hover:text-white transition-colors">
+                <SiTiktok className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>
@@ -96,7 +114,7 @@ export default function ContactPage() {
               <h3 className="font-heading font-bold text-2xl mb-2">
                 {isAr ? "تم الإرسال!" : "Message Sent!"}
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-400">
                 {isAr ? "شكراً لتواصلك معنا. سنرد عليك خلال 24 ساعة." : "Thanks for reaching out. We'll get back to you within 24 hours."}
               </p>
             </div>
@@ -104,7 +122,7 @@ export default function ContactPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <h2 className="font-heading font-bold text-xl mb-6">{isAr ? "أرسل لنا رسالة" : "Send us a message"}</h2>
               {sendError && (
-                <p className="text-red-600 text-sm bg-red-50 rounded-xl px-4 py-3">{sendError}</p>
+                <p className="text-red-400 text-sm bg-red-900/30 rounded-xl px-4 py-3">{sendError}</p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
