@@ -8,6 +8,7 @@ import * as pinoHttpModule from "pino-http";
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage/index.js";
 
 const app: Express = express();
 const isProd = process.env["NODE_ENV"] === "production";
@@ -102,6 +103,7 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use("/api/auth", authLimiter);
 app.use("/api",      generalLimiter);
 app.use("/api",      router);
+registerObjectStorageRoutes(app);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
