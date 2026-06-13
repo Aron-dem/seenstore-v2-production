@@ -9,21 +9,45 @@ import { requireAdmin } from "../middlewares/auth.js";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
-// ─── Image Storage helper (Replit Object Storage) ─────────────────────────────
+// ─── Image Storage helper (Supabase primary · Replit fallback) ────────────────
 async function uploadToStorage(buffer: Buffer, originalname: string, mimetype: string): Promise<string> {
+  const ext        = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "");
+  const objectName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  // ── 1. Supabase Storage (uses SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) ──────
+  const supabaseUrl = process.env["SUPABASE_URL"];
+  const supabaseKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+
+  if (supabaseUrl && supabaseKey) {
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+
+    const { data: buckets } = await supabase.storage.listBuckets();
+    if (!buckets?.some(b => b.name === "product-images")) {
+      await supabase.storage.createBucket("product-images", { public: true });
+    }
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(objectName, buffer, { contentType: mimetype, upsert: false });
+    if (error) throw new Error(`Supabase upload failed: ${error.message}`);
+
+    const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(objectName);
+    return publicUrl;
+  }
+
+  // ── 2. Replit Object Storage fallback ─────────────────────────────────────
   const REPLIT_SIDECAR = "http://127.0.0.1:1106";
   const bucketId       = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
-  if (!bucketId) throw new Error("Storage not configured: DEFAULT_OBJECT_STORAGE_BUCKET_ID is not set");
+  if (!bucketId) throw new Error("Storage not configured: set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY or DEFAULT_OBJECT_STORAGE_BUCKET_ID");
 
-  const ext        = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "");
-  const objectName = `product-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-  const signRes = await fetch(`${REPLIT_SIDECAR}/object-storage/signed-object-url`, {
+  const fullName = `product-images/${objectName}`;
+  const signRes  = await fetch(`${REPLIT_SIDECAR}/object-storage/signed-object-url`, {
     method:  "POST",
     headers: { "Content-Type": "application/json" },
     body:    JSON.stringify({
       bucket_name: bucketId,
-      object_name: objectName,
+      object_name: fullName,
       method:      "PUT",
       expires_at:  new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     }),
@@ -37,7 +61,7 @@ async function uploadToStorage(buffer: Buffer, originalname: string, mimetype: s
     body:    buffer,
   });
   if (!uploadRes.ok) throw new Error(`Upload failed: ${await uploadRes.text()}`);
-  return `https://storage.googleapis.com/${bucketId}/${objectName}`;
+  return `https://storage.googleapis.com/${bucketId}/${fullName}`;
 }
 
 // helper: extract a single string from req.params value (Express 5 types allow string | string[])
