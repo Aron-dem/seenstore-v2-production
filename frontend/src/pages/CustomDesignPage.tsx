@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useCustomOrders } from "../context/CustomOrdersContext";
 import { useLang } from "../context/LanguageContext";
-import { Link, useLocation } from "wouter";
-import { Upload, CheckCircle2, Palette, Shirt, Package, FileText, LogIn } from "lucide-react";
+import { Link } from "wouter";
+import { Upload, CheckCircle2, Palette, Shirt, Package, FileText, User, Mail } from "lucide-react";
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,7 +25,6 @@ export default function CustomDesignPage() {
   const { isAuthenticated, currentUser } = useAuth();
   const { addOrder } = useCustomOrders();
   const { isRTL } = useLang();
-  const [, setLocation] = useLocation();
   useSEO({
     title:       "تصميم مخصص — Custom Design Order",
     description: "اطلب تصميمك الخاص مع SEENSTORE. ارفع تصميمك وأنشئ ملابس ستريت وير مخصصة 100%. Custom streetwear design orders with SEENSTORE Egypt.",
@@ -42,6 +41,8 @@ export default function CustomDesignPage() {
     },
   });
 
+  const [guestName,  setGuestName]  = useState(currentUser?.name  ?? "");
+  const [guestEmail, setGuestEmail] = useState(currentUser?.email ?? "");
   const [itemType, setItemType] = useState("");
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
@@ -64,6 +65,10 @@ export default function CustomDesignPage() {
 
   const validate = () => {
     const errs: Record<string, string> = {};
+    if (!isAuthenticated) {
+      if (!guestName.trim()) errs.guestName = isRTL ? "اكتب اسمك" : "Enter your name";
+      if (!guestEmail.trim()) errs.guestEmail = isRTL ? "اكتب بريدك الإلكتروني" : "Enter your email";
+    }
     if (!itemType) errs.itemType = isRTL ? "اختر نوع القطعة" : "Choose an item type";
     if (!size) errs.size = isRTL ? "اختر المقاس" : "Choose a size";
     if (!color) errs.color = isRTL ? "اختر اللون" : "Choose a color";
@@ -77,9 +82,11 @@ export default function CustomDesignPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSubmitting(true);
     try {
+      const name  = isAuthenticated ? (currentUser?.name  ?? guestName)  : guestName;
+      const email = isAuthenticated ? (currentUser?.email ?? guestEmail) : guestEmail;
       const id = await addOrder({
-        customerName: currentUser!.name,
-        customerEmail: currentUser!.email,
+        customerName: name,
+        customerEmail: email,
         itemType,
         size,
         color,
@@ -93,36 +100,6 @@ export default function CustomDesignPage() {
       setSubmitting(false);
     }
   };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-md"
-        >
-          <div className="w-20 h-20 bg-[#E63946]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <LogIn className="w-10 h-10 text-[#E63946]" />
-          </div>
-          <h2 className="font-heading text-3xl font-bold mb-3">
-            {isRTL ? "سجّل دخولك أولاً" : "Login Required"}
-          </h2>
-          <p className="text-gray-500 mb-8">
-            {isRTL
-              ? "لازم تسجّل دخول عشان تقدر تطلب تصميم مخصص"
-              : "You need to be logged in to place a custom design order"}
-          </p>
-          <Link
-            href="/auth"
-            className="inline-block bg-[#E63946] text-white font-bold px-8 py-3 rounded-lg hover:bg-black transition-colors"
-          >
-            {isRTL ? "سجّل دخولك" : "Sign In / Register"}
-          </Link>
-        </motion.div>
-      </div>
-    );
-  }
 
   if (orderId) {
     return (
@@ -188,6 +165,43 @@ export default function CustomDesignPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Guest contact info — only shown when not logged in */}
+        {!isAuthenticated && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50">
+            <p className="sm:col-span-2 text-sm text-gray-500">
+              {isRTL ? "اكتب بياناتك عشان نتواصل معاك على طلبك" : "Enter your details so we can contact you about your order"}
+            </p>
+            <div>
+              <label className="flex items-center gap-2 font-heading font-bold text-sm mb-2">
+                <User className="w-4 h-4 text-[#E63946]" />
+                {isRTL ? "الاسم" : "Name"}
+              </label>
+              <input
+                type="text"
+                value={guestName}
+                onChange={e => { setGuestName(e.target.value); setErrors(er => ({ ...er, guestName: "" })); }}
+                placeholder={isRTL ? "اسمك الكامل" : "Your full name"}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors ${errors.guestName ? "border-[#E63946]" : "border-gray-200"}`}
+              />
+              {errors.guestName && <p className="text-[#E63946] text-xs mt-1">{errors.guestName}</p>}
+            </div>
+            <div>
+              <label className="flex items-center gap-2 font-heading font-bold text-sm mb-2">
+                <Mail className="w-4 h-4 text-[#E63946]" />
+                {isRTL ? "البريد الإلكتروني" : "Email"}
+              </label>
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={e => { setGuestEmail(e.target.value); setErrors(er => ({ ...er, guestEmail: "" })); }}
+                placeholder={isRTL ? "بريدك الإلكتروني" : "your@email.com"}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors ${errors.guestEmail ? "border-[#E63946]" : "border-gray-200"}`}
+              />
+              {errors.guestEmail && <p className="text-[#E63946] text-xs mt-1">{errors.guestEmail}</p>}
+            </div>
+          </div>
+        )}
+
         {/* Item Type */}
         <div>
           <label className="flex items-center gap-2 font-heading font-bold text-lg mb-4">

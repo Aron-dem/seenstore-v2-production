@@ -6,7 +6,7 @@ import { api, ApiError } from "../lib/apiClient";
 import {
   ShieldCheck, Clock, Loader2, Eye, X, Package,
   Users, ShoppingBag, Palette, TrendingUp, RefreshCw, Trash2,
-  ChevronLeft, ChevronRight, AlertCircle, UserCog, LogIn,
+  ChevronLeft, ChevronRight, AlertCircle, UserCog,
   Plus, Edit2, Check, Image, Upload, Store, MessageSquare, Reply, CheckCircle2,
   Tag,
 } from "lucide-react";
@@ -441,7 +441,7 @@ function ProductModal({ product, onClose, onSaved }: {
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
 export default function AdminPage() {
-  const { currentUser, isAdmin, isLoading, login } = useAuth();
+  const { currentUser, isAdmin, isLoading } = useAuth();
   const { isRTL } = useLang();
   const [, setLocation] = useLocation();
 
@@ -468,11 +468,6 @@ export default function AdminPage() {
   const [couponSaving,  setCouponSaving] = useState(false);
   const [couponError,   setCouponError]  = useState("");
 
-  // Login form
-  const [loginEmail,    setLoginEmail]    = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginError,    setLoginError]    = useState("");
-  const [loginLoading,  setLoginLoading]  = useState(false);
 
   const limit = 15;
 
@@ -606,14 +601,6 @@ export default function AdminPage() {
     else if (tab === "users") fetchUsers();
   }, [page, filterStatus]);
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError(""); setLoginLoading(true);
-    try { await login(loginEmail, loginPassword); }
-    catch (err) { setLoginError(err instanceof ApiError ? err.message : "Invalid credentials"); }
-    finally { setLoginLoading(false); }
-  };
-
   const deleteProduct = async (id: number) => {
     if (!confirm("Delete this product? This cannot be undone.")) return;
     await api.delete(`/admin/products/${id}`);
@@ -628,40 +615,17 @@ export default function AdminPage() {
     </div>
   );
 
-  if (!currentUser) return (
+  if (!currentUser || !isAdmin) return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ShieldCheck className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="font-heading text-3xl font-bold">Admin Login</h1>
-          <p className="text-gray-500 text-sm mt-2">Sign in with your admin account</p>
-        </div>
-        {loginError && <p className="text-red-400 text-sm bg-red-900/30 rounded-lg p-3 mb-4 text-center">{loginError}</p>}
-        <form onSubmit={handleLoginSubmit} className="space-y-4">
-          <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="Admin email" required
-            className="w-full border-2 border-zinc-700 rounded-xl px-5 py-4 focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500" />
-          <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="Password" required
-            className="w-full border-2 border-zinc-700 rounded-xl px-5 py-4 focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500" />
-          <button type="submit" disabled={loginLoading}
-            className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2">
-            {loginLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-            Enter Admin Panel
-          </button>
-        </form>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+        <p className="text-8xl font-heading font-bold text-zinc-800 mb-4">404</p>
+        <h1 className="font-heading text-2xl font-bold mb-3">الصفحة مش موجودة</h1>
+        <p className="text-gray-500 mb-8 text-sm">Page Not Found</p>
+        <button onClick={() => setLocation("/")}
+          className="bg-[#E63946] text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-colors">
+          Go Home
+        </button>
       </motion.div>
-    </div>
-  );
-
-  if (!isAdmin) return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6">
-      <div className="text-center">
-        <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-        <h1 className="font-heading text-2xl font-bold mb-2">Access Denied</h1>
-        <p className="text-gray-500 mb-6">This account doesn't have admin privileges.</p>
-        <button onClick={() => setLocation("/")} className="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-[#E63946] transition-colors">Go Home</button>
-      </div>
     </div>
   );
 
