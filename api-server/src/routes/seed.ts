@@ -29,7 +29,7 @@ router.post("/seed-products", async (_req, res) => {
 
   try {
     for (const [name, files] of Object.entries(PRODUCT_IMAGES)) {
-      const images = files.map(f => `/api/images/${f}`);
+      const images = files.map(f => `/images/${f}`);
       await db.update(productsTable)
         .set({ images, updatedAt: new Date() })
         .where(eq(productsTable.name, name));

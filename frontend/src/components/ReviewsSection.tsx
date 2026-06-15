@@ -89,7 +89,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         {[1, 2, 3, 4, 5].map(i => (
           <Star
             key={i}
-            className={`w-4 h-4 ${i <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+            className={`w-4 h-4 ${i <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-400"}`}
           />
         ))}
       </div>
@@ -97,7 +97,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
   };
 
   return (
-    <div className="mt-12 pt-12 border-t border-gray-200">
+    <div className="mt-12 pt-12 border-t border-zinc-700">
       <h3 className="text-2xl font-bold mb-8">{lang === "en" ? "Customer Reviews" : "آراء العملاء"}</h3>
 
       {isLoading ? (
@@ -107,12 +107,12 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
       ) : (
         <>
           {/* Rating Summary */}
-          <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+          <div className="mb-8 p-6 bg-zinc-800 rounded-lg border border-zinc-700">
             <div className="flex items-center gap-4 mb-4">
-              <div className="text-5xl font-bold">{averageRating.toFixed(1)}</div>
+              <div className="text-5xl font-bold text-white">{averageRating.toFixed(1)}</div>
               <div>
                 {renderStars(Math.round(averageRating))}
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-zinc-400 mt-2">
                   {lang === "en" ? `Based on ${reviews.length} reviews` : `بناءً على ${reviews.length} تقييم`}
                 </p>
               </div>
@@ -129,10 +129,12 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
 
           {/* Review Form */}
           {showForm && (
-            <form onSubmit={handleSubmit} className="mb-8 p-6 bg-gray-50 rounded-lg">
+            <form onSubmit={handleSubmit} className="mb-8 p-6 bg-zinc-800 rounded-lg border border-zinc-700">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold mb-2">{lang === "en" ? "Rating" : "التقييم"}</label>
+                  <label className="block text-sm font-bold mb-2 text-white">
+                    {lang === "en" ? "Rating" : "التقييم"}
+                  </label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map(i => (
                       <button
@@ -143,7 +145,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                       >
                         <Star
                           className={`w-6 h-6 cursor-pointer ${
-                            i <= formData.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                            i <= formData.rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-500"
                           }`}
                         />
                       </button>
@@ -152,45 +154,53 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2">{lang === "en" ? "Name" : "الاسم"}</label>
+                  <label className="block text-sm font-bold mb-2 text-white">
+                    {lang === "en" ? "Name" : "الاسم"}
+                  </label>
                   <input
                     type="text"
                     value={formData.userName}
                     onChange={e => setFormData({ ...formData, userName: e.target.value })}
-                    className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] outline-none"
+                    className="w-full bg-zinc-900 text-white border-2 border-zinc-600 p-3 rounded-lg focus:border-[#E63946] outline-none placeholder:text-zinc-500"
                     placeholder={lang === "en" ? "Your name" : "اسمك"}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2">{lang === "en" ? "Email" : "البريد الإلكتروني"}</label>
+                  <label className="block text-sm font-bold mb-2 text-white">
+                    {lang === "en" ? "Email" : "البريد الإلكتروني"}
+                  </label>
                   <input
                     type="email"
                     value={formData.userEmail}
                     onChange={e => setFormData({ ...formData, userEmail: e.target.value })}
-                    className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] outline-none"
+                    className="w-full bg-zinc-900 text-white border-2 border-zinc-600 p-3 rounded-lg focus:border-[#E63946] outline-none placeholder:text-zinc-500"
                     placeholder="you@example.com"
                     dir="ltr"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2">{lang === "en" ? "Title" : "العنوان"}</label>
+                  <label className="block text-sm font-bold mb-2 text-white">
+                    {lang === "en" ? "Title" : "العنوان"}
+                  </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] outline-none"
+                    className="w-full bg-zinc-900 text-white border-2 border-zinc-600 p-3 rounded-lg focus:border-[#E63946] outline-none placeholder:text-zinc-500"
                     placeholder={lang === "en" ? "Review title" : "عنوان التقييم"}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2">{lang === "en" ? "Comment" : "التعليق"}</label>
+                  <label className="block text-sm font-bold mb-2 text-white">
+                    {lang === "en" ? "Comment" : "التعليق"}
+                  </label>
                   <textarea
                     value={formData.comment}
                     onChange={e => setFormData({ ...formData, comment: e.target.value })}
-                    className="w-full border-2 border-gray-200 p-3 rounded-lg focus:border-[#E63946] outline-none resize-none"
+                    className="w-full bg-zinc-900 text-white border-2 border-zinc-600 p-3 rounded-lg focus:border-[#E63946] outline-none resize-none placeholder:text-zinc-500"
                     rows={4}
                     placeholder={lang === "en" ? "Share your experience..." : "شارك تجربتك..."}
                   />
@@ -217,7 +227,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                   <button
                     type="button"
                     onClick={() => setShowForm(false)}
-                    className="flex-1 border-2 border-gray-300 py-3 rounded-lg font-bold hover:border-[#E63946] transition-colors"
+                    className="flex-1 border-2 border-zinc-600 text-white py-3 rounded-lg font-bold hover:border-[#E63946] transition-colors"
                   >
                     {lang === "en" ? "Cancel" : "إلغاء"}
                   </button>
@@ -229,31 +239,31 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
           {/* Reviews List */}
           <div className="space-y-6">
             {reviews.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
+              <p className="text-zinc-400 text-center py-8">
                 {lang === "en" ? "No reviews yet. Be the first to review!" : "لا توجد تقييمات حتى الآن. كن الأول في التقييم!"}
               </p>
             ) : (
               reviews.map(review => (
-                <div key={review.id} className="p-6 border border-gray-200 rounded-lg">
+                <div key={review.id} className="p-6 border border-zinc-700 rounded-lg bg-zinc-900">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         {renderStars(review.rating)}
                         {review.verified && (
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          <span className="text-xs bg-green-900/50 text-green-400 px-2 py-1 rounded border border-green-700">
                             {lang === "en" ? "Verified" : "موثّق"}
                           </span>
                         )}
                       </div>
-                      <h4 className="font-bold">{review.title}</h4>
-                      <p className="text-sm text-gray-600">{lang === "en" ? "by" : "بواسطة"} {review.userName}</p>
+                      <h4 className="font-bold text-white">{review.title}</h4>
+                      <p className="text-sm text-zinc-400">{lang === "en" ? "by" : "بواسطة"} {review.userName}</p>
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-zinc-500">
                       {new Date(review.createdAt).toLocaleDateString(lang === "en" ? "en-US" : "ar-EG")}
                     </p>
                   </div>
-                  <p className="text-gray-700 mb-4">{review.comment}</p>
-                  <button className="text-sm text-gray-500 hover:text-[#E63946] transition-colors">
+                  <p className="text-zinc-300 mb-4">{review.comment}</p>
+                  <button className="text-sm text-zinc-500 hover:text-[#E63946] transition-colors">
                     👍 {review.helpful} {lang === "en" ? "Helpful" : "مفيد"}
                   </button>
                 </div>
