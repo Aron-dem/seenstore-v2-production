@@ -1,2 +1,4 @@
 - [Drizzle postgres-js execute shape](drizzle-postgres-js-execute.md) — `db.execute(sql`...`)` returns array directly, NOT `{ rows: [] }` — use `[row] = await db.execute(...)`.
 - [Token key alignment](token-key.md) — all auth token reads must use `seen_access_token` (not `seenstore_access_token`); `apiClient.ts` is the canonical source.
+- [Supabase credentials mismatch](supabase-credentials.md) — derive HTTP URL from JWT key ref (not SUPABASE_URL); Supabase postgres port unreachable from Replit; Storage API also blocked outbound.
+- [Product images local serving](product-images-local.md) — images served via express.static at /api/images/ (api-server/public/images/); Vite proxies /api/* to port 8080 so frontend uses relative paths /api/images/*.

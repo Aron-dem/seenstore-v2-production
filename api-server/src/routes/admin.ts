@@ -9,12 +9,21 @@ import { requireAdmin } from "../middlewares/auth.js";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
-// ── Derive Supabase HTTP URL from a postgres connection string ─────────────────
-// SUPABASE_URL may be set as the postgres connection string:
-//   postgresql://postgres:pass@db.<ref>.supabase.co:5432/postgres
-// We extract the project ref and build the REST API URL.
-function getSupabaseHttpUrl(rawUrl: string): string | null {
-  if (rawUrl.startsWith("http")) return rawUrl; // already an HTTP URL
+// ── Derive Supabase HTTP URL ───────────────────────────────────────────────────
+// Priority: decode project ref from JWT key → fall back to SUPABASE_URL parsing
+function getSupabaseHttpUrl(rawUrl?: string, jwtKey?: string): string | null {
+  // 1. Try to decode the ref from the JWT service role key (most reliable)
+  if (jwtKey) {
+    try {
+      const payload = jwtKey.split(".")[1];
+      const padded  = payload + "=".repeat((4 - payload.length % 4) % 4);
+      const decoded = JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
+      if (decoded.ref) return `https://${decoded.ref}.supabase.co`;
+    } catch { /* ignore */ }
+  }
+  // 2. Fall back to parsing SUPABASE_URL
+  if (!rawUrl) return null;
+  if (rawUrl.startsWith("http")) return rawUrl;
   const m = rawUrl.match(/db\.([a-z0-9]+)\.supabase\.co/);
   return m ? `https://${m[1]}.supabase.co` : null;
 }
@@ -24,14 +33,15 @@ async function uploadToStorage(buffer: Buffer, originalname: string, mimetype: s
   const ext        = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "");
   const objectName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  // ── 1. Supabase Storage (uses SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) ──────
+  // ── 1. Supabase Storage (derives URL from JWT key ref) ────────────────────
   const rawSupabaseUrl = process.env["SUPABASE_URL"];
   const supabaseKey    = process.env["SUPABASE_SERVICE_ROLE_KEY"];
-  const supabaseUrl    = rawSupabaseUrl ? getSupabaseHttpUrl(rawSupabaseUrl) : null;
+  const supabaseUrl    = getSupabaseHttpUrl(rawSupabaseUrl, supabaseKey);
 
   if (supabaseUrl && supabaseKey) {
     const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
+    const ws = (await import("ws")).default;
+    const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false }, realtime: { transport: ws } } as any);
 
     const { data: buckets } = await supabase.storage.listBuckets();
     if (!buckets?.some(b => b.name === "product-images")) {

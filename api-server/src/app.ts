@@ -1,4 +1,6 @@
 import express, { type Express } from "express";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import cors from "cors";
 import * as helmetModule from "helmet";
 const helmet = (helmetModule as any).default || helmetModule;
@@ -98,6 +100,14 @@ app.use(pinoHttp({
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
+
+// ─── Static product images ────────────────────────────────────────────────────
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = dirname(__filename);
+app.use("/api/images", express.static(join(__dirname, "..", "public", "images"), {
+  maxAge: "7d",
+  immutable: true,
+}));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", authLimiter);
