@@ -9,14 +9,25 @@ import { requireAdmin } from "../middlewares/auth.js";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
+// ── Derive Supabase HTTP URL from a postgres connection string ─────────────────
+// SUPABASE_URL may be set as the postgres connection string:
+//   postgresql://postgres:pass@db.<ref>.supabase.co:5432/postgres
+// We extract the project ref and build the REST API URL.
+function getSupabaseHttpUrl(rawUrl: string): string | null {
+  if (rawUrl.startsWith("http")) return rawUrl; // already an HTTP URL
+  const m = rawUrl.match(/db\.([a-z0-9]+)\.supabase\.co/);
+  return m ? `https://${m[1]}.supabase.co` : null;
+}
+
 // ─── Image Storage helper (Supabase primary · Replit fallback) ────────────────
 async function uploadToStorage(buffer: Buffer, originalname: string, mimetype: string): Promise<string> {
   const ext        = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "");
   const objectName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   // ── 1. Supabase Storage (uses SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) ──────
-  const supabaseUrl = process.env["SUPABASE_URL"];
-  const supabaseKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+  const rawSupabaseUrl = process.env["SUPABASE_URL"];
+  const supabaseKey    = process.env["SUPABASE_SERVICE_ROLE_KEY"];
+  const supabaseUrl    = rawSupabaseUrl ? getSupabaseHttpUrl(rawSupabaseUrl) : null;
 
   if (supabaseUrl && supabaseKey) {
     const { createClient } = await import("@supabase/supabase-js");
