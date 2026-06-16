@@ -21,7 +21,11 @@ const allowedOrigins = new Set<string>(FRONTEND_URL ? [FRONTEND_URL] : []);
 
 function isOriginAllowed(origin: string | undefined): boolean {
   if (!isProd) return true;
-  if (!origin) return false;
+
+  // Allow requests that do not send an Origin header (same-origin navigations,
+  // server-to-server calls, health checks, curl, etc.).
+  if (!origin) return true;
+
   if (allowedOrigins.has(origin)) return true;
   for (const allowed of allowedOrigins) {
     if (origin === allowed.replace(/\/$/, "")) return true;
