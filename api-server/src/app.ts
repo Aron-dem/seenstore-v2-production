@@ -10,7 +10,6 @@ import * as pinoHttpModule from "pino-http";
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { registerObjectStorageRoutes } from "./replit_integrations/object_storage/index.js";
 
 const app: Express = express();
 const isProd = process.env["NODE_ENV"] === "production";
@@ -117,7 +116,12 @@ app.use("/api/images", express.static(join(__dirname, "..", "public", "images"),
 app.use("/api/auth", authLimiter);
 app.use("/api",      generalLimiter);
 app.use("/api",      router);
+
+// Replit object-storage routes are optional and rely on Replit-specific
+// infrastructure. Load them only when explicitly running in a Replit
+// environment so Vercel doesn't try to resolve unnecessary dependencies.
 if (process.env["REPLIT_ENVIRONMENT"]) {
+  const { registerObjectStorageRoutes } = await import("./replit_integrations/object_storage/index.js");
   registerObjectStorageRoutes(app);
 }
 

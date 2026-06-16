@@ -18,7 +18,7 @@ const EXTERNALS = [
   "pg-native", "oracledb", "mongodb-client-encryption", "nodemailer", "handlebars",
   "knex", "typeorm", "protobufjs", "onnxruntime-node",
   "@tensorflow/*", "@prisma/client", "@mikro-orm/*", "@grpc/*", "@swc/*",
-  "@aws-sdk/*", "@azure/*", "@opentelemetry/*", "@google-cloud/*", "@google/*",
+  "@aws-sdk/*", "@azure/*", "@opentelemetry/*", "@google/*",
   "googleapis", "firebase-admin", "@parcel/watcher", "@sentry/profiling-node",
   "@tree-sitter/*", "aws-sdk", "classic-level", "dd-trace", "ffi-napi", "grpc",
   "hiredis", "kerberos", "leveldown", "miniflare", "mysql2", "newrelic", "odbc",
