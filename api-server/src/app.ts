@@ -117,7 +117,10 @@ app.use("/api/images", express.static(join(__dirname, "..", "public", "images"),
 app.use("/api/auth", authLimiter);
 app.use("/api",      generalLimiter);
 app.use("/api",      router);
-registerObjectStorageRoutes(app);
+if (process.env["REPLIT_ENVIRONMENT"]) {
+  registerObjectStorageRoutes(app);
+}
+
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
