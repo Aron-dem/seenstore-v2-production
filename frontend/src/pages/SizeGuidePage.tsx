@@ -15,13 +15,11 @@ export default function SizeGuidePage() {
         </p>
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden p-3 md:p-5">
-        <img
-          src="/size-guide-tshirt.jpg"
-          alt={isAr ? "دليل مقاسات التيشيرت" : "T-shirt size guide"}
-          className="w-full h-auto rounded-xl object-contain"
-        />
-      </div>
+      <img
+        src="/size-guide-tshirt.jpg"
+        alt={isAr ? "دليل مقاسات التيشيرت" : "T-shirt size guide"}
+        className="block w-full h-auto object-contain"
+      />
 
       <div className="mt-6 bg-gray-50 rounded-xl p-4 text-sm text-gray-500 text-center">
         {isAr
