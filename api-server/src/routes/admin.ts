@@ -120,6 +120,7 @@ router.get("/admin/orders", requireAdmin, async (req, res) => {
       couponCode: ordersTable.couponCode, couponDiscount: ordersTable.couponDiscount,
       depositAmount: ordersTable.depositAmount, paymentScreenshot: ordersTable.paymentScreenshot,
       vfSenderPhone: ordersTable.vfSenderPhone, guestPhone: ordersTable.guestPhone,
+      items: ordersTable.items,
       shippingAddress: ordersTable.shippingAddress,
       createdAt: ordersTable.createdAt, updatedAt: ordersTable.updatedAt,
     }).from(ordersTable).orderBy(desc(ordersTable.createdAt)).limit(limit).offset(offset),

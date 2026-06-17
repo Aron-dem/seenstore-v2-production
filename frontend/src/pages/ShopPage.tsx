@@ -149,7 +149,7 @@ export default function ShopPage({ season }: ShopPageProps = {}) {
     ? { title: "Summer Collection — كولكشن الصيف | SEENSTORE", desc: "تسوق كولكشن الصيف — تيشيرتات وبناطيل ستريت وير.", canonical: "https://seenstore.com/shop/summer" }
     : season === "winter"
     ? { title: "Winter Collection — كولكشن الشتاء | SEENSTORE", desc: "تسوق كولكشن الشتاء — هوديز وبناطيل ستريت وير.", canonical: "https://seenstore.com/shop/winter" }
-    : { title: "Shop All — تسوق الكل | ملابس ستريت وير", desc: "تسوق كل منتجات SEENSTORE. هوديز، كارجو بانت، تيشيرتات، وإكسسوارات ستريت وير بأسعار منافسة.", canonical: "https://seenstore.com/shop" };
+    : { title: "Shop All — تسوق الكل | ملابس ستريت وير", desc: "تسوق كل منتجات SEENSTORE. هوديز، كارجو بانت، وتيشيرتات ستريت وير بأسعار منافسة.", canonical: "https://seenstore.com/shop" };
 
   useSEO({
     title:       seasonMeta.title,

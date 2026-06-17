@@ -95,14 +95,14 @@ export default function HomePage() {
   const { toggleWishlist, isWishlisted } = useWishlist();
   useSEO({
     title:       "SEENSTORE | ملابس ستريت وير مصر — Egyptian Streetwear Brand",
-    description: "SEENSTORE — أحدث تشكيلات الستريت وير المصري. هوديز، كارجو بانت، تيشيرتات، وإكسسوارات بجودة عالية. شحن لجميع أنحاء مصر. تصاميم مخصصة على الطلب.",
+    description: "SEENSTORE — أحدث تشكيلات الستريت وير المصري. هوديز، كارجو بانت، وتيشيرتات بجودة عالية. شحن لجميع أنحاء مصر. تصاميم مخصصة على الطلب.",
     keywords:    "seenstore, ستريت وير مصر, streetwear egypt, ملابس شبابية مصر, هوديز مصر, كارجو بانت, تيشيرتات, إكسسوارات, urban fashion egypt, egyptian streetwear",
     canonical:   "https://seenstore.com/",
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "SEENSTORE — Egyptian Streetwear Brand",
-      "description": "أحدث تشكيلات الستريت وير المصري. هوديز، كارجو، تيشيرتات، وإكسسوارات.",
+      "description": "أحدث تشكيلات الستريت وير المصري. هوديز، كارجو، وتيشيرتات.",
       "url": "https://seenstore.com/",
       "breadcrumb": {
         "@type": "BreadcrumbList",

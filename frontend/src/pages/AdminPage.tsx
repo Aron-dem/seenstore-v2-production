@@ -16,6 +16,7 @@ import { deriveProductVariants, getColorHex, normalizeColorName, type ColorVaria
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CustomOrder = {
   id: string; userId: string | null; customerName: string; customerEmail: string;
+  customerPhone?: string | null;
   itemType: string; size: string; color: string; designUrl: string | null;
   details: string; status: "pending" | "processing" | "done" | "cancelled";
   adminNotes: string | null; createdAt: string; updatedAt: string;
@@ -64,7 +65,7 @@ const INIT_FORM: ProductForm = {
   season: "",
 };
 
-const CATEGORIES = ["T-Shirts", "Pants", "Hoodies", "Accessories"];
+const CATEGORIES = ["T-Shirts", "Pants", "Hoodies"];
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const CUSTOM_STATUS: Record<string, { label: string; color: string }> = {
@@ -102,6 +103,25 @@ type ContactMessage = {
   message: string; adminReply: string | null; repliedAt: string | null; createdAt: string;
 };
 
+type OrderItem = {
+  productId: number;
+  name: string;
+  price: number;
+  image: string;
+  size: string;
+  color: string;
+  quantity: number;
+};
+
+type ShippingAddress = {
+  fullName: string;
+  phone: string;
+  governorate: string;
+  city?: string;
+  street?: string;
+  postalCode?: string;
+};
+
 type Order = {
   id: string; userId: string | null;
   customerName: string; customerEmail: string;
@@ -109,6 +129,8 @@ type Order = {
   couponCode: string | null; couponDiscount: number;
   depositAmount: number; paymentScreenshot: string | null;
   vfSenderPhone: string | null; guestPhone: string | null;
+  items?: OrderItem[];
+  shippingAddress?: ShippingAddress | null;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   createdAt: string; updatedAt: string;
 };
@@ -165,7 +187,7 @@ function OrderModal({ order, onClose, isRTL, onUpdate }: {
         <div className="p-5 space-y-4 overflow-y-auto">
           <div className="grid grid-cols-2 gap-3 text-sm">
             {[
-              ["Name", order.customerName], ["Email", order.customerEmail],
+              ["Name", order.customerName], ["Phone", order.customerPhone ?? "—"],
               ["Item", order.itemType],      ["Size", order.size],
               ["Color", order.color],        ["Date", new Date(order.createdAt).toLocaleDateString()],
             ].map(([k, v]) => (
@@ -199,6 +221,100 @@ function OrderModal({ order, onClose, isRTL, onUpdate }: {
           <button onClick={handleSave} disabled={saving}
             className="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2">
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+            Save Changes
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function RegularOrderModal({ order, onClose, onStatusChange }: {
+  order: Order;
+  onClose: () => void;
+  onStatusChange: (id: string, status: Order["status"]) => void;
+}) {
+  const [status, setStatus] = useState<Order["status"]>(order.status);
+  const address = order.shippingAddress;
+
+  const save = async () => {
+    await api.patch(`/admin/orders/${order.id}`, { status });
+    onStatusChange(order.id, status);
+    onClose();
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+      <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-zinc-900 text-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+        <div className="bg-black text-white p-5 flex justify-between items-center">
+          <div>
+            <p className="text-gray-400 text-xs">Regular Order</p>
+            <h3 className="font-heading font-bold text-lg">{order.id}</h3>
+          </div>
+          <button onClick={onClose}><X className="w-5 h-5 text-gray-400 hover:text-white" /></button>
+        </div>
+        <div className="p-5 overflow-y-auto space-y-5">
+          <div className="grid md:grid-cols-2 gap-4 text-sm">
+            <div className="bg-zinc-800 rounded-xl p-4">
+              <p className="text-gray-400 text-xs mb-2">Customer</p>
+              <p className="font-semibold">{order.customerName}</p>
+              <p className="text-gray-300 text-xs">{order.customerEmail}</p>
+              <p className="text-gray-300 text-xs mt-1">{address?.phone || order.guestPhone || '—'}</p>
+            </div>
+            <div className="bg-zinc-800 rounded-xl p-4">
+              <p className="text-gray-400 text-xs mb-2">Shipping Address</p>
+              <p className="text-sm text-gray-200">{address?.street || '—'}</p>
+              <p className="text-xs text-gray-400 mt-1">{[address?.city, address?.governorate].filter(Boolean).join('، ') || '—'}</p>
+            </div>
+          </div>
+
+          <div className="bg-zinc-800 rounded-xl p-4">
+            <p className="text-gray-400 text-xs mb-3">Items</p>
+            <div className="space-y-3">
+              {(order.items ?? []).map((item, idx) => (
+                <div key={`${item.productId}-${idx}`} className="flex items-start justify-between gap-4 border-b border-zinc-700/70 pb-3 last:border-b-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{item.name}</p>
+                    <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-3">
+                      <span>Size: {item.size}</span>
+                      <span>Color: {item.color}</span>
+                      <span>Qty: {item.quantity}</span>
+                    </div>
+                  </div>
+                  <p className="font-bold whitespace-nowrap">{item.price * item.quantity} EGP</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 text-sm">
+            <div className="bg-zinc-800 rounded-xl p-4"><p className="text-gray-400 text-xs">Subtotal</p><p className="font-bold mt-1">{order.subtotal} EGP</p></div>
+            <div className="bg-zinc-800 rounded-xl p-4"><p className="text-gray-400 text-xs">Shipping</p><p className="font-bold mt-1">{order.shippingFee} EGP</p></div>
+            <div className="bg-zinc-800 rounded-xl p-4"><p className="text-gray-400 text-xs">Total</p><p className="font-bold mt-1 text-[#E63946]">{order.total} EGP</p></div>
+          </div>
+
+          {order.couponCode && (
+            <div className="bg-green-900/20 border border-green-800/40 rounded-xl p-4 text-sm">
+              <p className="font-semibold text-green-400">Coupon: {order.couponCode}</p>
+              <p className="text-gray-300 mt-1">Discount: {order.couponDiscount} EGP</p>
+            </div>
+          )}
+
+          <div>
+            <p className="text-xs text-gray-400 mb-2">Status</p>
+            <select value={status} onChange={(e) => setStatus(e.target.value as Order["status"])}
+              className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm bg-zinc-800 text-white focus:border-[#E63946] focus:outline-none">
+              {Object.entries(ORDER_STATUS).map(([key, value]) => (
+                <option key={key} value={key}>{value.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <button onClick={save}
+            className="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-[#E63946] transition-colors">
             Save Changes
           </button>
         </div>
@@ -558,6 +674,7 @@ export default function AdminPage() {
   const [loading,       setLoading]      = useState(false);
   const [error,         setError]        = useState("");
   const [selectedOrder, setSelectedOrder] = useState<CustomOrder | null>(null);
+  const [selectedRegularOrder, setSelectedRegularOrder] = useState<Order | null>(null);
   const [editProduct,   setEditProduct]  = useState<Product | null | undefined>(undefined);
   const [filterStatus,  setFilterStatus] = useState("all");
   const [page,          setPage]         = useState(1);
@@ -931,59 +1048,42 @@ export default function AdminPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-zinc-800 text-gray-400 text-xs uppercase tracking-wider">
-                        <tr>{["Order ID", "Customer", "Total / Deposit", "Payment Proof", "Status", "Date"].map(h => (
+                        <tr>{["Order ID", "Customer", "Items", "Total", "Status", "Date", ""].map(h => (
                           <th key={h} className="px-4 py-3 text-left font-semibold">{h}</th>
                         ))}</tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-800">
                         {orders.map(order => {
                           const cfg = ORDER_STATUS[order.status] ?? ORDER_STATUS["pending"]!;
+                          const phone = order.shippingAddress?.phone || order.guestPhone || "—";
                           return (
                             <tr key={order.id} className="hover:bg-zinc-800/60 transition-colors">
                               <td className="px-4 py-3">
                                 <p className="font-mono font-bold text-[#E63946] text-xs">{order.id}</p>
                                 {order.couponCode && <p className="text-green-600 text-xs mt-0.5">🏷 {order.couponCode} (−{order.couponDiscount} EGP)</p>}
-                                {order.guestPhone && <p className="text-blue-600 text-xs mt-0.5">📱 {order.guestPhone}</p>}
                               </td>
                               <td className="px-4 py-3">
                                 <p className="font-semibold text-sm">{order.customerName}</p>
-                                <p className="text-gray-400 text-xs truncate max-w-[130px]">{order.customerEmail}</p>
+                                <p className="text-gray-400 text-xs truncate max-w-[130px]">{phone}</p>
+                              </td>
+                              <td className="px-4 py-3 text-gray-400 text-xs">
+                                {(order.items ?? []).slice(0, 2).map((item) => item.name).join(", ") || "—"}
+                                {(order.items?.length ?? 0) > 2 && <span> +{(order.items?.length ?? 0) - 2}</span>}
                               </td>
                               <td className="px-4 py-3">
                                 <p className="font-bold text-sm">{order.total.toLocaleString()} EGP</p>
-                                {order.depositAmount > 0 && (
-                                  <p className="text-[#E63946] text-xs font-bold">مقدم: {order.depositAmount} EGP</p>
-                                )}
-                                {order.vfSenderPhone && (
-                                  <p className="text-gray-500 text-xs">VF: {order.vfSenderPhone}</p>
-                                )}
+                                <p className="text-gray-500 text-xs">Shipping: {order.shippingFee} EGP</p>
                               </td>
                               <td className="px-4 py-3">
-                                {order.paymentScreenshot ? (
-                                  <a href={order.paymentScreenshot} target="_blank" rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
-                                    <span>📸</span> عرض
-                                  </a>
-                                ) : (
-                                  <span className="text-gray-300 text-xs">—</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3">
-                                <select
-                                  value={order.status}
-                                  onChange={async (e) => {
-                                    const newStatus = e.target.value as Order["status"];
-                                    await api.patch(`/admin/orders/${order.id}`, { status: newStatus });
-                                    setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: newStatus } : o));
-                                  }}
-                                  className={`text-xs font-bold px-2 py-1.5 rounded-lg border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-black ${cfg.color}`}
-                                >
-                                  {Object.entries(ORDER_STATUS).map(([k, v]) => (
-                                    <option key={k} value={k}>{v.label}</option>
-                                  ))}
-                                </select>
+                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${cfg.color}`}>{cfg.label}</span>
                               </td>
                               <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{new Date(order.createdAt).toLocaleDateString()}</td>
+                              <td className="px-4 py-3">
+                                <button onClick={() => setSelectedRegularOrder(order)}
+                                  className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-black hover:text-white transition-colors">
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
@@ -1046,7 +1146,7 @@ export default function AdminPage() {
                               <td className="px-4 py-3 font-mono font-bold text-[#E63946] text-xs">{order.id}</td>
                               <td className="px-4 py-3">
                                 <p className="font-semibold">{order.customerName}</p>
-                                <p className="text-gray-400 text-xs truncate max-w-[140px]">{order.customerEmail}</p>
+                                <p className="text-gray-400 text-xs truncate max-w-[140px]">{order.customerPhone ?? order.customerEmail}</p>
                               </td>
                               <td className="px-4 py-3 font-medium">{order.itemType}</td>
                               <td className="px-4 py-3 text-gray-600">{order.size}</td>
@@ -1402,6 +1502,17 @@ export default function AdminPage() {
         {selectedOrder && (
           <OrderModal key="order-modal" order={selectedOrder} onClose={() => setSelectedOrder(null)} isRTL={isRTL}
             onUpdate={(id, data) => { setCustomOrders(prev => prev.map(o => o.id === id ? { ...o, ...data } : o)); setSelectedOrder(null); }} />
+        )}
+        {selectedRegularOrder && (
+          <RegularOrderModal
+            key="regular-order-modal"
+            order={selectedRegularOrder}
+            onClose={() => setSelectedRegularOrder(null)}
+            onStatusChange={(id, status) => {
+              setOrders((prev) => prev.map((order) => order.id === id ? { ...order, status } : order));
+              setSelectedRegularOrder(null);
+            }}
+          />
         )}
         {editProduct !== undefined && (
           <ProductModal key="product-modal"

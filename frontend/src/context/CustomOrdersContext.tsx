@@ -5,6 +5,7 @@ export type CustomOrder = {
   id: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string | null;
   itemType: string;
   size: string;
   color: string;

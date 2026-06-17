@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCustomOrders } from "../context/CustomOrdersContext";
 import { useLang } from "../context/LanguageContext";
 import { Link } from "wouter";
-import { Upload, CheckCircle2, Palette, Shirt, Package, FileText, User, Mail } from "lucide-react";
+import { Upload, CheckCircle2, Palette, Shirt, Package, FileText, User, Phone } from "lucide-react";
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,7 +22,7 @@ const COLORS = ["Black", "White", "Grey", "Navy", "Red", "Olive", "Beige", "Khak
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function CustomDesignPage() {
-  const { isAuthenticated, currentUser } = useAuth();
+  const { currentUser } = useAuth();
   const { addOrder } = useCustomOrders();
   const { isRTL } = useLang();
   useSEO({
@@ -42,7 +42,7 @@ export default function CustomDesignPage() {
   });
 
   const [guestName,  setGuestName]  = useState(currentUser?.name  ?? "");
-  const [guestEmail, setGuestEmail] = useState(currentUser?.email ?? "");
+  const [guestPhone, setGuestPhone] = useState(currentUser?.phone ?? "");
   const [itemType, setItemType] = useState("");
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
@@ -65,10 +65,8 @@ export default function CustomDesignPage() {
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!isAuthenticated) {
-      if (!guestName.trim()) errs.guestName = isRTL ? "اكتب اسمك" : "Enter your name";
-      if (!guestEmail.trim()) errs.guestEmail = isRTL ? "اكتب بريدك الإلكتروني" : "Enter your email";
-    }
+    if (!guestName.trim()) errs.guestName = isRTL ? "اكتب اسمك" : "Enter your name";
+    if (!guestPhone.trim()) errs.guestPhone = isRTL ? "اكتب رقم هاتفك" : "Enter your phone number";
     if (!itemType) errs.itemType = isRTL ? "اختر نوع القطعة" : "Choose an item type";
     if (!size) errs.size = isRTL ? "اختر المقاس" : "Choose a size";
     if (!color) errs.color = isRTL ? "اختر اللون" : "Choose a color";
@@ -82,10 +80,12 @@ export default function CustomDesignPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSubmitting(true);
     try {
-      const name  = isAuthenticated ? (currentUser?.name  ?? guestName)  : guestName;
-      const email = isAuthenticated ? (currentUser?.email ?? guestEmail) : guestEmail;
+      const name  = currentUser?.name  ?? guestName;
+      const phone = currentUser?.phone ?? guestPhone;
+      const email = currentUser?.email ?? undefined;
       const id = await addOrder({
         customerName: name,
+        customerPhone: phone,
         customerEmail: email,
         itemType,
         size,
@@ -165,42 +165,41 @@ export default function CustomDesignPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Guest contact info — only shown when not logged in */}
-        {!isAuthenticated && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50">
-            <p className="sm:col-span-2 text-sm text-gray-500">
-              {isRTL ? "اكتب بياناتك عشان نتواصل معاك على طلبك" : "Enter your details so we can contact you about your order"}
-            </p>
-            <div>
-              <label className="flex items-center gap-2 font-heading font-bold text-sm mb-2">
-                <User className="w-4 h-4 text-[#E63946]" />
-                {isRTL ? "الاسم" : "Name"}
-              </label>
-              <input
-                type="text"
-                value={guestName}
-                onChange={e => { setGuestName(e.target.value); setErrors(er => ({ ...er, guestName: "" })); }}
-                placeholder={isRTL ? "اسمك الكامل" : "Your full name"}
-                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${errors.guestName ? "border-[#E63946]" : "border-zinc-700"}`}
-              />
-              {errors.guestName && <p className="text-[#E63946] text-xs mt-1">{errors.guestName}</p>}
-            </div>
-            <div>
-              <label className="flex items-center gap-2 font-heading font-bold text-sm mb-2">
-                <Mail className="w-4 h-4 text-[#E63946]" />
-                {isRTL ? "البريد الإلكتروني" : "Email"}
-              </label>
-              <input
-                type="email"
-                value={guestEmail}
-                onChange={e => { setGuestEmail(e.target.value); setErrors(er => ({ ...er, guestEmail: "" })); }}
-                placeholder={isRTL ? "بريدك الإلكتروني" : "your@email.com"}
-                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${errors.guestEmail ? "border-[#E63946]" : "border-zinc-700"}`}
-              />
-              {errors.guestEmail && <p className="text-[#E63946] text-xs mt-1">{errors.guestEmail}</p>}
-            </div>
+        {/* Contact info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50">
+          <p className="sm:col-span-2 text-sm text-gray-500">
+            {isRTL ? "اكتب اسمك ورقمك عشان نتواصل معاك بخصوص الطلب" : "Enter your name and phone number so we can contact you about your order"}
+          </p>
+          <div>
+            <label className="flex items-center gap-2 font-heading font-bold text-sm mb-2">
+              <User className="w-4 h-4 text-[#E63946]" />
+              {isRTL ? "الاسم" : "Name"}
+            </label>
+            <input
+              type="text"
+              value={guestName}
+              onChange={e => { setGuestName(e.target.value); setErrors(er => ({ ...er, guestName: "" })); }}
+              placeholder={isRTL ? "اسمك الكامل" : "Your full name"}
+              className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${errors.guestName ? "border-[#E63946]" : "border-zinc-700"}`}
+            />
+            {errors.guestName && <p className="text-[#E63946] text-xs mt-1">{errors.guestName}</p>}
           </div>
-        )}
+          <div>
+            <label className="flex items-center gap-2 font-heading font-bold text-sm mb-2">
+              <Phone className="w-4 h-4 text-[#E63946]" />
+              {isRTL ? "رقم الهاتف" : "Phone Number"}
+            </label>
+            <input
+              type="tel"
+              value={guestPhone}
+              onChange={e => { setGuestPhone(e.target.value); setErrors(er => ({ ...er, guestPhone: "" })); }}
+              placeholder="01xxxxxxxxx"
+              dir="ltr"
+              className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${errors.guestPhone ? "border-[#E63946]" : "border-zinc-700"}`}
+            />
+            {errors.guestPhone && <p className="text-[#E63946] text-xs mt-1">{errors.guestPhone}</p>}
+          </div>
+        </div>
 
         {/* Item Type */}
         <div>

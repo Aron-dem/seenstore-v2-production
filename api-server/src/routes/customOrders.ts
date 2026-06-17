@@ -8,7 +8,8 @@ const router: IRouter = Router();
 
 const createCustomOrderSchema = z.object({
   customerName:  z.string().min(2).max(80),
-  customerEmail: z.string().email(),
+  customerPhone: z.string().min(8).max(30),
+  customerEmail: z.string().email().optional(),
   itemType:      z.string().min(1),
   size:          z.string().min(1),
   color:         z.string().min(1),
@@ -24,9 +25,14 @@ router.post("/custom-orders", optionalAuth, async (req, res) => {
     return;
   }
 
+  const fallbackEmail = req.user?.email
+    ?? parsed.data.customerEmail
+    ?? `guest-${parsed.data.customerPhone.replace(/\D/g, "") || "custom"}@seenstore.local`;
+
   const [order] = await db.insert(customOrdersTable).values({
     customerName: parsed.data.customerName,
-    customerEmail: parsed.data.customerEmail,
+    customerEmail: fallbackEmail,
+    customerPhone: parsed.data.customerPhone,
     itemType: parsed.data.itemType,
     size: parsed.data.size,
     color: parsed.data.color,

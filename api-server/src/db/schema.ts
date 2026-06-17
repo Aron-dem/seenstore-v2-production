@@ -131,6 +131,7 @@ export const customOrdersTable = pgTable("custom_orders", {
   userId:        text("user_id").references(() => usersTable.id, { onDelete: "set null" }),
   customerName:  text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone"),
   itemType:      text("item_type").notNull(),
   size:          text("size").notNull(),
   color:         text("color").notNull(),
