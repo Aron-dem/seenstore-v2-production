@@ -131,6 +131,8 @@ type Order = {
   vfSenderPhone: string | null; guestPhone: string | null;
   items?: OrderItem[];
   shippingAddress?: ShippingAddress | null;
+  adminNotes?: string | null;
+  callStatus?: "new" | "called" | "confirmed" | "no_answer" | "cancelled";
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   createdAt: string; updatedAt: string;
 };
@@ -148,6 +150,14 @@ const ORDER_STATUS: Record<string, { label: string; color: string }> = {
   shipped:    { label: "Shipped",    color: "bg-indigo-100 text-indigo-800" },
   delivered:  { label: "Delivered",  color: "bg-green-100 text-green-800"  },
   cancelled:  { label: "Cancelled",  color: "bg-red-100 text-red-800"      },
+};
+
+const CALL_STATUS: Record<string, { label: string; color: string }> = {
+  new:       { label: "New",        color: "bg-gray-100 text-gray-700" },
+  called:    { label: "Called",     color: "bg-blue-100 text-blue-800" },
+  confirmed: { label: "Confirmed",  color: "bg-green-100 text-green-800" },
+  no_answer: { label: "No Answer",  color: "bg-yellow-100 text-yellow-800" },
+  cancelled: { label: "Cancelled",  color: "bg-red-100 text-red-800" },
 };
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
@@ -229,18 +239,26 @@ function OrderModal({ order, onClose, isRTL, onUpdate }: {
   );
 }
 
-function RegularOrderModal({ order, onClose, onStatusChange }: {
+function RegularOrderModal({ order, onClose, onSave }: {
   order: Order;
   onClose: () => void;
-  onStatusChange: (id: string, status: Order["status"]) => void;
+  onSave: (orderId: string, patch: Partial<Order>) => void;
 }) {
   const [status, setStatus] = useState<Order["status"]>(order.status);
+  const [callStatus, setCallStatus] = useState<Order["callStatus"]>(order.callStatus ?? "new");
+  const [adminNotes, setAdminNotes] = useState(order.adminNotes ?? "");
+  const [saving, setSaving] = useState(false);
   const address = order.shippingAddress;
 
   const save = async () => {
-    await api.patch(`/admin/orders/${order.id}`, { status });
-    onStatusChange(order.id, status);
-    onClose();
+    setSaving(true);
+    try {
+      await api.patch(`/admin/orders/${order.id}`, { status, callStatus, adminNotes });
+      onSave(order.id, { status, callStatus, adminNotes });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -262,12 +280,12 @@ function RegularOrderModal({ order, onClose, onStatusChange }: {
               <p className="text-gray-400 text-xs mb-2">Customer</p>
               <p className="font-semibold">{order.customerName}</p>
               <p className="text-gray-300 text-xs">{order.customerEmail}</p>
-              <p className="text-gray-300 text-xs mt-1">{address?.phone || order.guestPhone || '—'}</p>
+              <p className="text-gray-300 text-xs mt-1">{address?.phone || order.guestPhone || "—"}</p>
             </div>
             <div className="bg-zinc-800 rounded-xl p-4">
               <p className="text-gray-400 text-xs mb-2">Shipping Address</p>
-              <p className="text-sm text-gray-200">{address?.street || '—'}</p>
-              <p className="text-xs text-gray-400 mt-1">{[address?.city, address?.governorate].filter(Boolean).join('، ') || '—'}</p>
+              <p className="text-sm text-gray-200">{address?.street || "—"}</p>
+              <p className="text-xs text-gray-400 mt-1">{[address?.city, address?.governorate].filter(Boolean).join("، ") || "—"}</p>
             </div>
           </div>
 
@@ -303,18 +321,41 @@ function RegularOrderModal({ order, onClose, onStatusChange }: {
             </div>
           )}
 
-          <div>
-            <p className="text-xs text-gray-400 mb-2">Status</p>
-            <select value={status} onChange={(e) => setStatus(e.target.value as Order["status"])}
-              className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm bg-zinc-800 text-white focus:border-[#E63946] focus:outline-none">
-              {Object.entries(ORDER_STATUS).map(([key, value]) => (
-                <option key={key} value={key}>{value.label}</option>
-              ))}
-            </select>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-gray-400 mb-2">Order Status</p>
+              <select value={status} onChange={(e) => setStatus(e.target.value as Order["status"])}
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm bg-zinc-800 text-white focus:border-[#E63946] focus:outline-none">
+                {Object.entries(ORDER_STATUS).map(([key, value]) => (
+                  <option key={key} value={key}>{value.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-2">Call Status</p>
+              <select value={callStatus} onChange={(e) => setCallStatus(e.target.value as Order["callStatus"])}
+                className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm bg-zinc-800 text-white focus:border-[#E63946] focus:outline-none">
+                {Object.entries(CALL_STATUS).map(([key, value]) => (
+                  <option key={key} value={key}>{value.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <button onClick={save}
-            className="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-[#E63946] transition-colors">
+          <div>
+            <p className="text-xs text-gray-400 mb-2">Admin Notes</p>
+            <textarea
+              value={adminNotes}
+              onChange={(e) => setAdminNotes(e.target.value)}
+              rows={4}
+              className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm focus:border-[#E63946] focus:outline-none resize-none bg-zinc-800 text-white placeholder:text-gray-500"
+              placeholder="Write call notes, delivery notes, or confirmation notes"
+            />
+          </div>
+
+          <button onClick={save} disabled={saving}
+            className="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-[#E63946] transition-colors flex items-center justify-center gap-2">
+            {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             Save Changes
           </button>
         </div>
@@ -1508,8 +1549,8 @@ export default function AdminPage() {
             key="regular-order-modal"
             order={selectedRegularOrder}
             onClose={() => setSelectedRegularOrder(null)}
-            onStatusChange={(id, status) => {
-              setOrders((prev) => prev.map((order) => order.id === id ? { ...order, status } : order));
+            onSave={(id, patch) => {
+              setOrders((prev) => prev.map((order) => order.id === id ? { ...order, ...patch } : order));
               setSelectedRegularOrder(null);
             }}
           />

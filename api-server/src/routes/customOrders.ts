@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@workspace/db";
 import { customOrdersTable } from "@workspace/db/schema";
 import { optionalAuth } from "../middlewares/auth.js";
+import { notifyNewCustomOrder } from "../lib/telegram";
 
 const router: IRouter = Router();
 
@@ -40,6 +41,16 @@ router.post("/custom-orders", optionalAuth, async (req, res) => {
     userId: req.user?.sub ?? null,
     designUrl: parsed.data.designUrl ?? null,
   }).returning();
+
+  await notifyNewCustomOrder({
+    orderId: order.id,
+    customerName: parsed.data.customerName,
+    phone: parsed.data.customerPhone,
+    itemType: parsed.data.itemType,
+    size: parsed.data.size,
+    color: parsed.data.color,
+    details: parsed.data.details,
+  }).catch((error) => console.error("Telegram custom order notification failed:", error));
 
   res.status(201).json({ order });
 });

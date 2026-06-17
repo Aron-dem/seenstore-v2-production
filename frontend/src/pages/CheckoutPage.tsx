@@ -312,7 +312,7 @@ export default function CheckoutPage() {
                       <div className="font-bold">{ar ? m.nameAr : m.nameEn}</div>
                       <div className="text-sm text-gray-500">{ar ? m.daysAr : m.daysEn}</div>
                     </div>
-                    <div className="font-bold">`${m.cost} EGP`</div>
+                    <div className="font-bold">{m.cost} EGP</div>
                   </label>
                 ))}
               </div>

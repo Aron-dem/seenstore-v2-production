@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { ordersTable } from "@workspace/db/schema";
 import { requireAuth, optionalAuth } from "../middlewares/auth";
+import { notifyNewOrder } from "../lib/telegram";
 import { z } from "zod";
 
 const router: IRouter = Router();
@@ -58,8 +59,18 @@ router.post("/orders", optionalAuth, async (req, res) => {
       depositAmount:     payload.depositAmount,
       paymentScreenshot: payload.paymentScreenshot ?? null,
       vfSenderPhone:     payload.vfSenderPhone ?? null,
+      callStatus:        "new",
       status: "pending",
     }).returning();
+
+    await notifyNewOrder({
+      orderId: newOrder[0]!.id,
+      customerName: payload.customerName,
+      phone: payload.shippingAddress.phone,
+      total: payload.total,
+      shippingFee: payload.shippingFee,
+      items: payload.items,
+    }).catch((error) => console.error("Telegram order notification failed:", error));
 
     res.status(201).json(newOrder[0]);
   } catch (error: any) {

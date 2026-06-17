@@ -135,8 +135,8 @@ export default function CustomDesignPage() {
           </div>
           <p className="text-gray-400 text-sm mb-8">
             {isRTL
-              ? "هيتواصل معاك فريقنا على بريدك الإلكتروني لتأكيد الطلب والتفاصيل."
-              : "Our team will contact you via email to confirm your order and discuss the details."}
+              ? "هيتواصل معاك فريقنا على رقم الهاتف لتأكيد الطلب والتفاصيل."
+              : "Our team will contact you by phone to confirm your order and discuss the details."}
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/" className="border-2 border-black px-6 py-3 rounded-lg font-bold hover:bg-black hover:text-white transition-colors">

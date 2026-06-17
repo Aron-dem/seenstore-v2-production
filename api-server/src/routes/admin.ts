@@ -117,6 +117,7 @@ router.get("/admin/orders", requireAdmin, async (req, res) => {
       customerName: ordersTable.customerName, customerEmail: ordersTable.customerEmail,
       subtotal: ordersTable.subtotal, shippingFee: ordersTable.shippingFee,
       total: ordersTable.total, status: ordersTable.status,
+      callStatus: ordersTable.callStatus, adminNotes: ordersTable.adminNotes,
       couponCode: ordersTable.couponCode, couponDiscount: ordersTable.couponDiscount,
       depositAmount: ordersTable.depositAmount, paymentScreenshot: ordersTable.paymentScreenshot,
       vfSenderPhone: ordersTable.vfSenderPhone, guestPhone: ordersTable.guestPhone,
@@ -130,11 +131,17 @@ router.get("/admin/orders", requireAdmin, async (req, res) => {
 });
 
 router.patch("/admin/orders/:id", requireAdmin, async (req, res) => {
-  const id      = paramStr(req.params["id"] as string | string[]);
-  const { status } = z.object({
-    status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]),
+  const id = paramStr(req.params["id"] as string | string[]);
+  const parsed = z.object({
+    status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled"]).optional(),
+    callStatus: z.enum(["new", "called", "confirmed", "no_answer", "cancelled"]).optional(),
+    adminNotes: z.string().max(2000).optional(),
   }).parse(req.body);
-  await db.update(ordersTable).set({ status, updatedAt: new Date() }).where(eq(ordersTable.id, id));
+
+  await db.update(ordersTable)
+    .set({ ...parsed, updatedAt: new Date() })
+    .where(eq(ordersTable.id, id));
+
   res.json({ success: true });
 });
 

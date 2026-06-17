@@ -35,6 +35,8 @@
 | `ADMIN_EMAILS` | Comma-separated list of admin emails | `seifabdelrahman858@gmail.com` |
 | `PORT` | API server port | `8080` |
 | `DEFAULT_OBJECT_STORAGE_BUCKET_ID` | Supabase storage bucket ID for product images | `product-images` |
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token for order alerts | — |
+| `TELEGRAM_CHAT_IDS` | Comma-separated or newline-separated Telegram chat IDs to notify | — |
 
 ---
 
