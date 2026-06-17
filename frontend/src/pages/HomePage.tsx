@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ChevronRight, Truck, RefreshCcw, ShieldCheck, Star, Heart, Flame, Palette, ChevronDown } from "lucide-react";
 import { useLang } from "../context/LanguageContext";
 import { useWishlist } from "../context/WishlistContext";
+import { deriveProductVariants, getColorHex, type ColorVariant } from "../lib/productVariants";
 import SeenstoreLogo from "../components/SeenstoreLogo";
 import { useSEO } from "../hooks/useSEO";
 
@@ -12,6 +13,7 @@ type ApiProduct = {
   price: number; originalPrice: number | null;
   category: string; badge: string | null;
   sizes: string[]; colors: string[]; images: string[];
+  variants?: ColorVariant[];
   inStock: boolean;
 };
 
@@ -96,7 +98,7 @@ export default function HomePage() {
   useSEO({
     title:       "SEENSTORE | ملابس ستريت وير مصر — Egyptian Streetwear Brand",
     description: "SEENSTORE — أحدث تشكيلات الستريت وير المصري. هوديز، كارجو بانت، وتيشيرتات بجودة عالية. شحن لجميع أنحاء مصر. تصاميم مخصصة على الطلب.",
-    keywords:    "seenstore, ستريت وير مصر, streetwear egypt, ملابس شبابية مصر, هوديز مصر, كارجو بانت, تيشيرتات, إكسسوارات, urban fashion egypt, egyptian streetwear",
+    keywords:    "seenstore, ستريت وير مصر, streetwear egypt, ملابس شبابية مصر, هوديز مصر, كارجو بانت, تيشيرتات, urban fashion egypt, egyptian streetwear",
     canonical:   "https://seenstore.com/",
     jsonLd: {
       "@context": "https://schema.org",
@@ -259,6 +261,7 @@ export default function HomePage() {
             {featuredProducts.map((product, idx) => {
               const img = product.images[0] ?? PLACEHOLDER;
               const displayName = isRTL && product.nameAr ? product.nameAr : product.name;
+              const variants = deriveProductVariants(product);
               return (
                 <motion.div
                   key={product.id}
@@ -288,11 +291,13 @@ export default function HomePage() {
                   </div>
                   <div className="p-4 md:p-5">
                     <h3 className="font-heading font-semibold text-sm md:text-base text-white mb-1 line-clamp-1">{displayName}</h3>
-                    {product.colors.length > 0 && (
-                      <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-600 bg-gray-500" />
-                        {product.colors[0]}
-                      </p>
+                    {variants.length > 0 && (
+                      <div className="flex items-center gap-1 mb-2 flex-wrap">
+                        {variants.slice(0, 3).map((variant) => (
+                          <span key={variant.color} title={variant.color} className="w-2.5 h-2.5 rounded-full inline-block border border-gray-600" style={{ backgroundColor: getColorHex(variant.color, variant.hex) }} />
+                        ))}
+                        <span className="text-xs text-gray-400">{variants[0]?.color}</span>
+                      </div>
                     )}
                     <p className="font-heading font-bold text-sm md:text-lg text-white">{product.price} EGP</p>
                   </div>

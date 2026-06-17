@@ -7,8 +7,9 @@ import { toast } from "sonner";
 interface Product {
   id: number;
   name: string;
+  nameAr?: string;
   price: number;
-  image: string;
+  images?: string[];
   category: string;
 }
 
@@ -51,7 +52,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         const response = await fetch(`/api/products?q=${encodeURIComponent(query)}&limit=8`);
         if (response.ok) {
           const data = await response.json();
-          setResults(data);
+          setResults(data.products ?? []);
         }
       } catch (error) {
         console.error("Search error:", error);
@@ -125,12 +126,12 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                       className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors text-left"
                     >
                       <img
-                        src={product.image}
-                        alt={product.name}
+                        src={product.images?.[0] ?? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect fill='%23f3f4f6' width='64' height='64'/%3E%3C/svg%3E"}
+                        alt={isRTL && product.nameAr ? product.nameAr : product.name}
                         className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm truncate">{product.name}</p>
+                        <p className="font-bold text-sm truncate">{isRTL && product.nameAr ? product.nameAr : product.name}</p>
                         <p className="text-xs text-gray-500">{product.category}</p>
                         <p className="text-sm font-bold text-[#E63946] mt-1">{product.price} EGP</p>
                       </div>

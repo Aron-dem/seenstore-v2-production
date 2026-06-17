@@ -147,7 +147,7 @@ export default function ProductDetailPage() {
   const displayDesc = isRTL && product.descriptionAr ? product.descriptionAr : product.description;
 
   return (
-    <div className="container mx-auto px-6 py-24 max-w-6xl">
+    <div className="container mx-auto px-6 py-24 pb-32 md:pb-24 max-w-6xl">
       {/* Breadcrumb */}
       <nav className={`flex items-center gap-2 text-sm text-gray-500 mb-10 ${isRTL ? "flex-row-reverse" : ""}`}>
         <Link href="/" className="hover:text-black transition-colors">{isRTL ? "الرئيسية" : "Home"}</Link>
@@ -328,8 +328,8 @@ export default function ProductDetailPage() {
               {activeTab === "shipping" && (
                 <ul className="space-y-2">
                   {[
-                    isRTL ? "توصيل 3-5 أيام عمل" : "Delivery 3-5 business days",
-                    isRTL ? "توصيل مجاني فوق 1000 جنيه" : "Free shipping over 1000 EGP",
+                    isRTL ? "التوصيل خلال 3-5 أيام عمل" : "Delivery in 3-5 business days",
+                    isRTL ? "تكلفة الشحن تُحدد عند إتمام الطلب" : "Shipping cost is calculated at checkout",
                     isRTL ? "إرجاع مجاني خلال 14 يوم" : "Free returns within 14 days",
                   ].map(line => (
                     <li key={line} className="flex items-start gap-2">
@@ -355,31 +355,59 @@ export default function ProductDetailPage() {
             <Link href="/shop" className="text-sm font-bold hover:text-[#E63946] transition-colors">{isRTL ? "عرض الكل" : "View All"}</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {related.map(p => (
-              <div key={p.id} className="group">
-                <Link href={`/product/${p.id}`} className="block relative aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden mb-4">
-                  <img src={p.images[0] ?? PLACEHOLDER} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <button 
-                    onClick={(e) => { e.preventDefault(); toggleWishlist(p.id); }}
-                    className={`absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md transition-all ${isWishlisted(p.id) ? "text-[#E63946]" : "text-gray-400"}`}
-                  >
-                    <Heart className={`w-4 h-4 ${isWishlisted(p.id) ? "fill-[#E63946]" : ""}`} />
-                  </button>
-                </Link>
-                <Link href={`/product/${p.id}`}>
-                  <h3 className="font-heading font-semibold text-sm hover:text-[#E63946] transition-colors mb-1 line-clamp-1">
-                    {isRTL && p.nameAr ? p.nameAr : p.name}
-                  </h3>
-                </Link>
-                <p className="font-heading font-bold text-sm">{p.price} EGP</p>
-              </div>
-            ))}
+            {related.map(p => {
+              const relatedVariants = deriveProductVariants(p);
+              return (
+                <div key={p.id} className="group">
+                  <Link href={`/product/${p.id}`} className="block relative aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden mb-4">
+                    <img src={p.images[0] ?? PLACEHOLDER} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <button 
+                      onClick={(e) => { e.preventDefault(); toggleWishlist(p.id); }}
+                      className={`absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md transition-all ${isWishlisted(p.id) ? "text-[#E63946]" : "text-gray-400"}`}
+                    >
+                      <Heart className={`w-4 h-4 ${isWishlisted(p.id) ? "fill-[#E63946]" : ""}`} />
+                    </button>
+                  </Link>
+                  <Link href={`/product/${p.id}`}>
+                    <h3 className="font-heading font-semibold text-sm hover:text-[#E63946] transition-colors mb-1 line-clamp-1">
+                      {isRTL && p.nameAr ? p.nameAr : p.name}
+                    </h3>
+                  </Link>
+                  {relatedVariants.length > 0 && (
+                    <div className="flex items-center gap-1 mb-1">
+                      {relatedVariants.slice(0, 3).map((variant) => (
+                        <span key={variant.color} title={variant.color} className="w-3 h-3 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: getColorHex(variant.color, variant.hex) }} />
+                      ))}
+                    </div>
+                  )}
+                  <p className="font-heading font-bold text-sm">{p.price} EGP</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Reviews Section */}
       {product && <ReviewsSection productId={product.id} />}
+
+      {/* Mobile sticky bar */}
+      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur md:hidden">
+        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-gray-500 truncate">{displayName}</p>
+            <p className="font-heading font-bold text-base">{product.price} EGP</p>
+            <p className="text-[11px] text-gray-500 truncate">{selectedSize ? `${t.productDetail.size}: ${selectedSize}` : ""}{selectedColor ? ` • ${t.productDetail.color}: ${selectedColor}` : ""}</p>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            disabled={!product.inStock}
+            className={`px-5 py-3 rounded-xl font-bold text-sm transition-colors ${!product.inStock ? "bg-gray-200 text-gray-500" : "bg-black text-white hover:bg-[#E63946]"}`}
+          >
+            {!product.inStock ? (isRTL ? "نفذ" : "Sold Out") : (isRTL ? "أضف للسلة" : "Add to Cart")}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
