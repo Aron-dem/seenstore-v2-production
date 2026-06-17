@@ -181,7 +181,7 @@ export default function CustomDesignPage() {
                 value={guestName}
                 onChange={e => { setGuestName(e.target.value); setErrors(er => ({ ...er, guestName: "" })); }}
                 placeholder={isRTL ? "اسمك الكامل" : "Your full name"}
-                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors ${errors.guestName ? "border-[#E63946]" : "border-gray-200"}`}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${errors.guestName ? "border-[#E63946]" : "border-zinc-700"}`}
               />
               {errors.guestName && <p className="text-[#E63946] text-xs mt-1">{errors.guestName}</p>}
             </div>
@@ -195,7 +195,7 @@ export default function CustomDesignPage() {
                 value={guestEmail}
                 onChange={e => { setGuestEmail(e.target.value); setErrors(er => ({ ...er, guestEmail: "" })); }}
                 placeholder={isRTL ? "بريدك الإلكتروني" : "your@email.com"}
-                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors ${errors.guestEmail ? "border-[#E63946]" : "border-gray-200"}`}
+                className={`w-full border-2 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${errors.guestEmail ? "border-[#E63946]" : "border-zinc-700"}`}
               />
               {errors.guestEmail && <p className="text-[#E63946] text-xs mt-1">{errors.guestEmail}</p>}
             </div>
@@ -330,8 +330,8 @@ export default function CustomDesignPage() {
               ? "اكتب بالتفصيل التصميم اللي عايزه، الألوان، المكان على القطعة، أي ملاحظات إضافية..."
               : "Describe your design in detail — colors, placement on the item, any special notes..."}
             rows={5}
-            className={`w-full border-2 rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none focus:border-[#E63946] transition-colors ${
-              errors.details ? "border-[#E63946]" : "border-gray-200"
+            className={`w-full border-2 rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none focus:border-[#E63946] transition-colors bg-zinc-900 text-white placeholder:text-gray-500 ${
+              errors.details ? "border-[#E63946]" : "border-zinc-700"
             }`}
           />
           {errors.details && <p className="text-[#E63946] text-sm mt-1">{errors.details}</p>}

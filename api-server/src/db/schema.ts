@@ -2,6 +2,12 @@ import { sql } from "drizzle-orm";
 import { pgTable, text, integer, timestamp, pgEnum, jsonb, index, uniqueIndex, serial, boolean } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
+const productVariantSchema = z.object({
+  color: z.string().min(1),
+  hex: z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/).nullable().optional(),
+  images: z.array(z.string()).default([]),
+});
+
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const userRoleEnum          = pgEnum("user_role", ["user", "admin"]);
 export const orderStatusEnum       = pgEnum("order_status", ["pending", "processing", "shipped", "delivered", "cancelled"]);
@@ -62,6 +68,7 @@ export const productsTable = pgTable("products", {
   sizes:         text("sizes").array().notNull().default(sql`'{}'::text[]`),
   colors:        text("colors").array().notNull().default(sql`'{}'::text[]`),
   images:        text("images").array().notNull().default(sql`'{}'::text[]`),
+  variants:      jsonb("variants").$type<Array<z.infer<typeof productVariantSchema>>>().notNull().default(sql`'[]'::jsonb`),
   inStock:       boolean("in_stock").notNull().default(true),
   season:        text("season"),
   createdAt:     timestamp("created_at").notNull().defaultNow(),
@@ -85,6 +92,7 @@ export const insertProductSchema = z.object({
   sizes:         z.array(z.string()).optional(),
   colors:        z.array(z.string()).optional(),
   images:        z.array(z.string()).optional(),
+  variants:      z.array(productVariantSchema).optional(),
   inStock:       z.boolean().optional(),
   season:        z.enum(["summer", "winter"]).nullable().optional(),
 });

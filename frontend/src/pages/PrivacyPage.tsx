@@ -177,14 +177,14 @@ export default function PrivacyPage() {
       </div>
 
       {/* Quick nav */}
-      <div className="bg-gray-50 rounded-2xl p-6 mb-12">
-        <p className="font-semibold text-sm text-gray-600 mb-3">{isAr ? "محتويات هذه الصفحة" : "On this page"}</p>
+      <div className="bg-gray-50 text-gray-900 rounded-2xl p-6 mb-12 border border-gray-200">
+        <p className="font-semibold text-sm text-gray-700 mb-3">{isAr ? "محتويات هذه الصفحة" : "On this page"}</p>
         <div className="flex flex-wrap gap-2">
           {sections.map((s, i) => (
             <a
               key={i}
               href={`#section-${i}`}
-              className="text-xs bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-[#E63946] hover:text-[#E63946] transition-colors"
+              className="text-xs text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-[#E63946] hover:text-[#E63946] transition-colors"
             >
               {s.title}
             </a>

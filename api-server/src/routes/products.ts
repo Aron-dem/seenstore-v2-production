@@ -33,6 +33,24 @@ router.get("/products", async (req, res) => {
   res.json({ products });
 });
 
+// GET /api/products/:id/related — related products from same category
+router.get("/products/:id/related", async (req, res) => {
+  const id = parseInt(req.params["id"]!, 10);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid product id" }); return; }
+
+  const [currentProduct] = await db.select().from(productsTable).where(eq(productsTable.id, id)).limit(1);
+  if (!currentProduct) { res.status(404).json({ error: "Product not found" }); return; }
+
+  const related = (await db.select().from(productsTable)
+    .where(eq(productsTable.category, currentProduct.category))
+    .orderBy(desc(productsTable.createdAt))
+    .limit(8))
+    .filter((product) => product.id !== id)
+    .slice(0, 4);
+
+  res.json({ products: related });
+});
+
 // GET /api/products/:id — single product
 router.get("/products/:id", async (req, res) => {
   const id = parseInt(req.params["id"]!, 10);

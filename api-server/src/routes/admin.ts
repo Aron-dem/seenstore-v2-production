@@ -149,6 +149,12 @@ router.post("/admin/upload/image", requireAdmin, upload.single("image"), async (
 });
 
 // ─── Products ─────────────────────────────────────────────────────────────────
+const productVariantSchema = z.object({
+  color: z.string().min(1),
+  hex: z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/).nullable().optional(),
+  images: z.array(z.string()).default([]),
+});
+
 const productSchema = z.object({
   name:          z.string().min(1).max(120),
   nameAr:        z.string().max(120).default(""),
@@ -160,7 +166,8 @@ const productSchema = z.object({
   badge:         z.string().max(20).nullable().optional(),
   sizes:         z.array(z.string()).default([]),
   colors:        z.array(z.string()).default([]),
-  images:        z.array(z.string().url()).default([]),
+  images:        z.array(z.string()).default([]),
+  variants:      z.array(productVariantSchema).default([]),
   inStock:       z.boolean().default(true),
   season:        z.enum(["summer", "winter"]).nullable().optional(),
 });

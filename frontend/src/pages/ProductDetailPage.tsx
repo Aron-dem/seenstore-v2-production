@@ -8,6 +8,7 @@ import { Heart, ShieldCheck, Truck, RefreshCcw, Info, Check, ChevronRight, Loade
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import ReviewsSection from "../components/ReviewsSection";
+import { deriveProductVariants, getColorHex, type ColorVariant } from "../lib/productVariants";
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect fill='%23f3f4f6' width='400' height='533'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='24' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3ESEENSTORE%3C/text%3E%3C/svg%3E";
 
@@ -17,6 +18,7 @@ type ApiProduct = {
   price: number; originalPrice: number | null;
   category: string; badge: string | null;
   sizes: string[]; colors: string[]; images: string[];
+  variants?: ColorVariant[];
   inStock: boolean;
 };
 
@@ -26,16 +28,6 @@ const FALLBACK_FEATURES = [
   "Durable Construction",
   "Machine Washable",
 ];
-
-const COLOR_MAP: Record<string, string> = {
-  black: "#000000", white: "#E5E5E5", grey: "#9CA3AF", gray: "#9CA3AF",
-  red: "#E63946", navy: "#1E3A8A", blue: "#3B82F6", green: "#10B981",
-  olive: "#6B7A41", beige: "#C9B99A", khaki: "#C3B091",
-};
-
-function getColorHex(name: string): string {
-  return COLOR_MAP[name.toLowerCase()] ?? "#888";
-}
 
 const API_BASE = "/api";
 
@@ -80,9 +72,10 @@ export default function ProductDetailPage() {
         if (!res.ok) throw new Error("Failed");
         const data = await res.json();
         const p: ApiProduct = data.product;
+        const variants = deriveProductVariants(p);
         setProduct(p);
         setSelectedSize(p.sizes[0] ?? "");
-        setSelectedColor(p.colors[0] ?? "");
+        setSelectedColor(variants[0]?.color ?? p.colors[0] ?? "");
         setSelectedImg(0);
 
         // Fetch related
@@ -95,6 +88,10 @@ export default function ProductDetailPage() {
       finally { setLoading(false); }
     })();
   }, [id]);
+
+  useEffect(() => {
+    setSelectedImg(0);
+  }, [selectedColor]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -141,7 +138,11 @@ export default function ProductDetailPage() {
     );
   }
 
-  const images = product.images.length > 0 ? product.images : [PLACEHOLDER];
+  const variants = deriveProductVariants(product);
+  const activeVariant = variants.find((variant) => variant.color === selectedColor) ?? variants[0] ?? null;
+  const images = (activeVariant?.images?.length ? activeVariant.images : product.images).length > 0
+    ? (activeVariant?.images?.length ? activeVariant.images : product.images)
+    : [PLACEHOLDER];
   const displayName = isRTL && product.nameAr ? product.nameAr : product.name;
   const displayDesc = isRTL && product.descriptionAr ? product.descriptionAr : product.description;
 
@@ -213,23 +214,28 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Color */}
-          {product.colors.length > 0 && (
+          {variants.length > 0 && (
             <div>
               <p className="text-sm font-semibold mb-3 uppercase tracking-wide">
                 {t.productDetail.color}: <span className="font-bold text-black">{selectedColor}</span>
               </p>
               <div className="flex flex-wrap gap-3">
-                {product.colors.map(c => (
-                  <button key={c} onClick={() => setSelectedColor(c)} title={c}
-                    className={`relative w-10 h-10 rounded-full border-3 transition-all hover:scale-110 ${selectedColor === c ? "border-black shadow-md scale-110" : "border-gray-300"}`}
-                    style={{ backgroundColor: getColorHex(c), borderWidth: 3 }}>
-                    {selectedColor === c && (
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <Check className={`w-4 h-4 ${["white", "beige", "khaki"].includes(c.toLowerCase()) ? "text-gray-700" : "text-white"}`} />
-                      </span>
-                    )}
-                  </button>
-                ))}
+                {variants.map((variant) => {
+                  const colorHex = getColorHex(variant.color, variant.hex);
+                  const isLight = ["white", "beige", "khaki", "cream", "off white"].includes(variant.color.toLowerCase());
+                  return (
+                    <button key={variant.color} onClick={() => setSelectedColor(variant.color)} title={variant.color}
+                      className={`relative min-w-10 h-10 px-2 rounded-full border-3 transition-all hover:scale-105 flex items-center justify-center gap-2 ${selectedColor === variant.color ? "border-black shadow-md scale-105" : "border-gray-300"}`}
+                      style={{ backgroundColor: colorHex, borderWidth: 3 }}>
+                      <span className={`text-[11px] font-bold ${isLight ? "text-gray-800" : "text-white"}`}>{variant.color}</span>
+                      {selectedColor === variant.color && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-black flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

@@ -262,7 +262,7 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            <div className="bg-white border-2 border-gray-100 rounded-2xl p-7 flex flex-col">
+            <div className="bg-white text-gray-900 border-2 border-gray-100 rounded-2xl p-7 flex flex-col">
               <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mb-5">
                 <Phone className="w-6 h-6 text-gray-600" />
               </div>
@@ -275,7 +275,7 @@ export default function CheckoutPage() {
                 value={guestPhone}
                 onChange={e => setGuestPhone(e.target.value)}
                 placeholder={ar ? "01xxxxxxxxx" : "01xxxxxxxxx"}
-                className="w-full border-2 border-gray-200 p-3 rounded-xl text-sm focus:border-[#E63946] outline-none mb-3"
+                className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl text-sm focus:border-[#E63946] outline-none mb-3"
                 dir="ltr"
               />
               <button
@@ -327,7 +327,7 @@ export default function CheckoutPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {step === "address" && (
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="bg-white text-gray-900 p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-[#E63946]" />
                 {ar ? "عنوان الشحن" : "Shipping Address"}
@@ -357,13 +357,13 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-sm font-bold mb-1">{ar ? "الاسم الكامل *" : "Full Name *"}</label>
                     <input type="text" value={address.fullName} onChange={e => setAddress({ ...address, fullName: e.target.value })}
-                      className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
+                      className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
                       placeholder={ar ? "أحمد محمد" : "Ahmed Mohamed"} />
                   </div>
                   <div>
                     <label className="block text-sm font-bold mb-1">{ar ? "رقم الهاتف *" : "Phone *"}</label>
                     <input type="tel" value={address.phone} onChange={e => setAddress({ ...address, phone: e.target.value })}
-                      className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
+                      className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
                       placeholder="01xxxxxxxxx" dir="ltr" />
                   </div>
                 </div>
@@ -371,7 +371,7 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-sm font-bold mb-1">{ar ? "المحافظة *" : "Governorate *"}</label>
                     <select value={address.governorate} onChange={e => setAddress({ ...address, governorate: e.target.value })}
-                      className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors">
+                      className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors">
                       <option value="">{ar ? "اختر المحافظة" : "Select governorate"}</option>
                       {GOVS.map(g => <option key={g} value={g}>{g}</option>)}
                     </select>
@@ -379,14 +379,14 @@ export default function CheckoutPage() {
                   <div>
                     <label className="block text-sm font-bold mb-1">{ar ? "المدينة / الحي" : "City / District"}</label>
                     <input type="text" value={address.city} onChange={e => setAddress({ ...address, city: e.target.value })}
-                      className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
+                      className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
                       placeholder={ar ? "مدينة نصر" : "Nasr City"} />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold mb-1">{ar ? "عنوان الشارع *" : "Street Address *"}</label>
                   <input type="text" value={address.street} onChange={e => setAddress({ ...address, street: e.target.value })}
-                    className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
+                    className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors"
                     placeholder={ar ? "مثال: 15 شارع النيل، عمارة 3، شقة 5" : "e.g. 15 Nile St, Building 3, Apt 5"} />
                 </div>
                 <button type="submit" className="w-full bg-[#E63946] text-white py-3 rounded-xl font-bold hover:bg-black transition-colors mt-2">
@@ -397,7 +397,7 @@ export default function CheckoutPage() {
           )}
 
           {step === "shipping" && (
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="bg-white text-gray-900 p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Truck className="w-5 h-5 text-[#E63946]" />
                 {ar ? "طريقة الشحن" : "Shipping Method"}
@@ -425,7 +425,7 @@ export default function CheckoutPage() {
           )}
 
           {step === "review" && (
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="bg-white text-gray-900 p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h2 className="text-xl font-bold mb-6">{ar ? "مراجعة طلبك" : "Review Your Order"}</h2>
               <div className="space-y-3 mb-6">
                 <div className="p-4 bg-gray-50 rounded-xl">
@@ -457,7 +457,7 @@ export default function CheckoutPage() {
                   <div className="flex gap-2">
                     <input type="text" value={couponInput} onChange={e => setCouponInput(e.target.value)} onKeyDown={e => e.key === "Enter" && applyCoupon()}
                       placeholder={ar ? "أدخل كود الخصم هنا" : "Enter discount code"}
-                      className="flex-1 border-2 border-gray-200 px-4 py-3 rounded-xl focus:border-[#E63946] outline-none uppercase text-sm transition-colors" />
+                      className="flex-1 border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 px-4 py-3 rounded-xl focus:border-[#E63946] outline-none uppercase text-sm transition-colors" />
                     <button onClick={applyCoupon} disabled={couponLoading} className="bg-gray-900 text-white px-5 py-3 rounded-xl font-bold hover:bg-black transition-colors text-sm disabled:opacity-60 flex items-center gap-2">
                       {couponLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                       {ar ? "تطبيق" : "Apply"}
@@ -483,7 +483,7 @@ export default function CheckoutPage() {
           )}
 
           {step === "vf_payment" && (
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="bg-white text-gray-900 p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
                 <Smartphone className="w-5 h-5 text-[#E63946]" />
                 {ar ? "الدفع عبر فودافون كاش" : "Pay via Vodafone Cash"}
@@ -542,7 +542,7 @@ export default function CheckoutPage() {
                 <input
                   type="tel" value={vfPhone} onChange={e => setVfPhone(e.target.value)}
                   placeholder="01xxxxxxxxx"
-                  className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors text-lg font-mono"
+                  className="w-full border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 p-3 rounded-xl focus:border-[#E63946] outline-none transition-colors text-lg font-mono"
                   dir="ltr"
                 />
                 <p className="text-xs text-gray-400 mt-1">{ar ? "الرقم المسجل على فودافون كاش اللي حولت منه" : "The registered Vodafone Cash number you sent from"}</p>

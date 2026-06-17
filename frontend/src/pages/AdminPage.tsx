@@ -11,6 +11,7 @@ import {
   Tag,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { deriveProductVariants, getColorHex, normalizeColorName, type ColorVariant } from "../lib/productVariants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CustomOrder = {
@@ -37,13 +38,21 @@ type Product = {
   price: number; originalPrice: number | null;
   category: string; badge: string | null;
   sizes: string[]; colors: string[]; images: string[];
+  variants?: ColorVariant[];
   inStock: boolean; season: string | null; createdAt: string;
+};
+
+type ProductVariantForm = {
+  color: string;
+  hex: string;
+  imagesText: string;
 };
 
 type ProductForm = {
   name: string; nameAr: string; price: string; originalPrice: string;
   category: string; badge: string;
   sizes: string[]; colors: string; images: string[];
+  variants: ProductVariantForm[];
   description: string; descriptionAr: string; inStock: boolean;
   season: "" | "summer" | "winter";
 };
@@ -51,7 +60,7 @@ type ProductForm = {
 const INIT_FORM: ProductForm = {
   name: "", nameAr: "", price: "", originalPrice: "",
   category: "T-Shirts", badge: "", sizes: [], colors: "",
-  images: [], description: "", descriptionAr: "", inStock: true,
+  images: [], variants: [], description: "", descriptionAr: "", inStock: true,
   season: "",
 };
 
@@ -66,6 +75,26 @@ const CUSTOM_STATUS: Record<string, { label: string; color: string }> = {
 };
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect fill='%23f3f4f6' width='80' height='80'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='10' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3ENo image%3C/text%3E%3C/svg%3E";
+
+function splitColorInput(value: string): string[] {
+  return value.split(",").map((color) => color.trim()).filter(Boolean);
+}
+
+function toVariantForms(colorsInput: string, images: string[], variants?: ColorVariant[]): ProductVariantForm[] {
+  const colors = splitColorInput(colorsInput);
+  const derived = variants && variants.length > 0
+    ? variants
+    : deriveProductVariants({ colors, images, variants: [] });
+
+  return colors.map((color) => {
+    const existing = derived.find((variant) => normalizeColorName(variant.color) === normalizeColorName(color));
+    return {
+      color,
+      hex: existing?.hex ?? getColorHex(color),
+      imagesText: (existing?.images ?? []).join("\n"),
+    };
+  });
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ContactMessage = {
@@ -183,12 +212,16 @@ function ProductModal({ product, onClose, onSaved }: {
   product: Product | null; onClose: () => void;
   onSaved: (p: Product) => void;
 }) {
+  const initialColors = product ? product.colors.join(", ") : INIT_FORM.colors;
+  const initialImages = product?.images ?? INIT_FORM.images;
   const [form,       setForm]       = useState<ProductForm>(product ? {
     name: product.name, nameAr: product.nameAr, price: String(product.price),
     originalPrice: product.originalPrice ? String(product.originalPrice) : "",
     category: product.category, badge: product.badge ?? "",
-    sizes: product.sizes, colors: product.colors.join(", "),
-    images: product.images, description: product.description,
+    sizes: product.sizes, colors: initialColors,
+    images: initialImages,
+    variants: toVariantForms(initialColors, initialImages, product.variants),
+    description: product.description,
     descriptionAr: product.descriptionAr, inStock: product.inStock,
     season: (product.season as "" | "summer" | "winter") ?? "",
   } : INIT_FORM);
@@ -199,13 +232,45 @@ function ProductModal({ product, onClose, onSaved }: {
   const fileRef                     = useRef<HTMLInputElement>(null);
 
   const set = (k: keyof ProductForm, v: any) => setForm(f => ({ ...f, [k]: v }));
+  const syncVariants = (colorsValue: string, imagesValue: string[], existingVariants = form.variants) => {
+    setForm((prev) => ({
+      ...prev,
+      colors: colorsValue,
+      images: imagesValue,
+      variants: toVariantForms(
+        colorsValue,
+        imagesValue,
+        existingVariants.map((variant) => ({
+          color: variant.color,
+          hex: variant.hex,
+          images: variant.imagesText.split("\n").map((value) => value.trim()).filter(Boolean),
+        })),
+      ),
+    }));
+  };
+  const updateVariant = (color: string, patch: Partial<ProductVariantForm>) => {
+    setForm((prev) => ({
+      ...prev,
+      variants: prev.variants.map((variant) =>
+        normalizeColorName(variant.color) === normalizeColorName(color)
+          ? { ...variant, ...patch }
+          : variant,
+      ),
+    }));
+  };
   const toggleSize = (s: string) => set("sizes", form.sizes.includes(s) ? form.sizes.filter(x => x !== s) : [...form.sizes, s]);
   const addUrl = () => {
     const u = urlInput.trim();
     if (!u) return;
-    try { new URL(u); set("images", [...form.images, u]); setUrlInput(""); } catch { setError("Invalid URL"); }
+    try {
+      new URL(u);
+      syncVariants(form.colors, [...form.images, u]);
+      setUrlInput("");
+    } catch {
+      setError("Invalid URL");
+    }
   };
-  const removeImg = (i: number) => set("images", form.images.filter((_, idx) => idx !== i));
+  const removeImg = (i: number) => syncVariants(form.colors, form.images.filter((_, idx) => idx !== i));
 
   const uploadFiles = async (files: FileList) => {
     if (!files.length) return;
@@ -225,7 +290,7 @@ function ProductModal({ product, onClose, onSaved }: {
         return data.url as string;
       });
       const urls = await Promise.all(uploads);
-      set("images", [...form.images, ...urls]);
+      syncVariants(form.colors, [...form.images, ...urls]);
     } catch (e: any) { setError(e.message); }
     finally { setUploading(false); }
   };
@@ -244,8 +309,15 @@ function ProductModal({ product, onClose, onSaved }: {
         category:      form.category,
         badge:         form.badge || null,
         sizes:         form.sizes,
-        colors:        form.colors.split(",").map(c => c.trim()).filter(Boolean),
+        colors:        splitColorInput(form.colors),
         images:        form.images,
+        variants:      form.variants
+          .filter((variant) => variant.color.trim())
+          .map((variant) => ({
+            color: variant.color.trim(),
+            hex: variant.hex.trim() || null,
+            images: variant.imagesText.split("\n").map((value) => value.trim()).filter(Boolean),
+          })),
         description:   form.description.trim(),
         descriptionAr: form.descriptionAr.trim(),
         inStock:       form.inStock,
@@ -365,9 +437,40 @@ function ProductModal({ product, onClose, onSaved }: {
           {/* Colors */}
           <div>
             <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Colors (comma-separated)</label>
-            <input value={form.colors} onChange={e => set("colors", e.target.value)} placeholder="Black, White, Grey, Navy"
+            <input value={form.colors} onChange={e => syncVariants(e.target.value, form.images)} placeholder="Black, White, Grey, Navy"
               className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2.5 text-sm focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500" />
           </div>
+
+          {/* Variant swatches */}
+          {form.variants.length > 0 && (
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-gray-500 uppercase block">Color Variants</label>
+              <div className="space-y-3">
+                {form.variants.map((variant) => (
+                  <div key={variant.color} className="border border-zinc-700 rounded-xl p-4 bg-zinc-950/50">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="w-8 h-8 rounded-full border-2 border-zinc-600" style={{ backgroundColor: variant.hex || getColorHex(variant.color) }} />
+                      <p className="font-semibold text-sm flex-1">{variant.color}</p>
+                      <input
+                        value={variant.hex}
+                        onChange={(e) => updateVariant(variant.color, { hex: e.target.value })}
+                        placeholder="#000000"
+                        className="w-32 border-2 border-zinc-700 rounded-xl px-3 py-2 text-xs focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white"
+                      />
+                    </div>
+                    <textarea
+                      value={variant.imagesText}
+                      onChange={(e) => updateVariant(variant.color, { imagesText: e.target.value })}
+                      rows={3}
+                      placeholder="One image URL per line for this color variant"
+                      className="w-full border-2 border-zinc-700 rounded-xl px-3 py-2 text-xs focus:border-[#E63946] focus:outline-none bg-zinc-800 text-white placeholder:text-gray-500 resize-none"
+                    />
+                    <p className="text-[11px] text-gray-500 mt-2">Leave empty to fall back to automatic image matching from filenames.</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Description */}
           <div className="grid grid-cols-2 gap-4">

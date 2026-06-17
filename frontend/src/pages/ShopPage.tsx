@@ -6,6 +6,7 @@ import { useLang } from "../context/LanguageContext";
 import { ShoppingBag, Heart, Filter, Grid, List, X, Check, Loader2 } from "lucide-react";
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
+import { deriveProductVariants, getColorHex, type ColorVariant } from "../lib/productVariants";
 
 const ALL_CATEGORIES = [
   { label: "T-Shirts", labelAr: "تيشيرتات", keys: ["T-Shirts"] },
@@ -17,16 +18,20 @@ const SUMMER_CATS = ["T-Shirts", "Pants"];
 const WINTER_CATS = ["Hoodies", "Pants"];
 const SIZES     = ["XS", "S", "M", "L", "XL", "XXL"];
 const COLORS    = [
-  { name: "Black",  hex: "#000000" },
-  { name: "White",  hex: "#E5E5E5" },
-  { name: "Grey",   hex: "#9CA3AF" },
-  { name: "Navy",   hex: "#1E3A8A" },
-  { name: "Red",    hex: "#E63946" },
-  { name: "Olive",  hex: "#6B7A41" },
-  { name: "Beige",  hex: "#C9B99A" },
-  { name: "Blue",   hex: "#3B82F6" },
-  { name: "Green",  hex: "#10B981" },
-  { name: "Khaki",  hex: "#C3B091" },
+  { name: "Black",        hex: "#000000" },
+  { name: "White",        hex: "#E5E5E5" },
+  { name: "Grey",         hex: "#9CA3AF" },
+  { name: "Navy",         hex: "#1E3A8A" },
+  { name: "Red",          hex: "#E63946" },
+  { name: "Olive",        hex: "#6B7A41" },
+  { name: "Beige",        hex: "#C9B99A" },
+  { name: "Blue",         hex: "#3B82F6" },
+  { name: "Green",        hex: "#10B981" },
+  { name: "Khaki",        hex: "#C3B091" },
+  { name: "Charcoal",     hex: "#36454F" },
+  { name: "Burgundy",     hex: "#800020" },
+  { name: "Dark Brown",   hex: "#5C4033" },
+  { name: "Forest Green", hex: "#228B22" },
 ];
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect fill='%23f3f4f6' width='400' height='533'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='24' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3ESEENSTORE%3C/text%3E%3C/svg%3E";
@@ -37,6 +42,7 @@ type ApiProduct = {
   price: number; originalPrice: number | null;
   category: string; badge: string | null;
   sizes: string[]; colors: string[]; images: string[];
+  variants?: ColorVariant[];
   inStock: boolean; createdAt: string;
 };
 
@@ -351,8 +357,9 @@ export default function ShopPage({ season }: ShopPageProps = {}) {
           ) : (
             <div className={view === "grid" ? "grid grid-cols-2 md:grid-cols-3 gap-5" : "space-y-5"}>
               {filtered.map((p, idx) => {
+                const variants = deriveProductVariants(p);
                 const img       = p.images[0] ?? PLACEHOLDER;
-                const mainColor = p.colors[0] ?? "";
+                const mainColor = variants[0]?.color ?? p.colors[0] ?? "";
                 const mainSize  = p.sizes[0] ?? "M";
                 return (
                   <motion.div
@@ -385,15 +392,12 @@ export default function ShopPage({ season }: ShopPageProps = {}) {
                           {isRTL && p.nameAr ? p.nameAr : p.name}
                         </h3>
                       </Link>
-                      {p.colors.length > 0 && (
-                        <div className="flex items-center gap-1 mb-2">
-                          {p.colors.slice(0, 4).map(c => {
-                            const def = COLORS.find(x => x.name.toLowerCase() === c.toLowerCase());
-                            return (
-                              <span key={c} title={c} className="w-4 h-4 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: def?.hex ?? "#ccc" }} />
-                            );
-                          })}
-                          {p.colors.length > 4 && <span className="text-xs text-gray-400">+{p.colors.length - 4}</span>}
+                      {variants.length > 0 && (
+                        <div className="flex items-center gap-1 mb-2 flex-wrap">
+                          {variants.slice(0, 4).map((variant) => (
+                            <span key={variant.color} title={variant.color} className="w-4 h-4 rounded-full border border-gray-200 inline-block" style={{ backgroundColor: getColorHex(variant.color, variant.hex) }} />
+                          ))}
+                          {variants.length > 4 && <span className="text-xs text-gray-400">+{variants.length - 4}</span>}
                         </div>
                       )}
                       <div className="flex items-center gap-2 mb-3">
