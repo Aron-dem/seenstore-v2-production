@@ -70,6 +70,7 @@ export const productsTable = pgTable("products", {
   images:        text("images").array().notNull().default(sql`'{}'::text[]`),
   variants:      jsonb("variants").$type<Array<z.infer<typeof productVariantSchema>>>().notNull().default(sql`'[]'::jsonb`),
   inStock:       boolean("in_stock").notNull().default(true),
+  soldOut:       boolean("sold_out").notNull().default(false),
   season:        text("season"),
   createdAt:     timestamp("created_at").notNull().defaultNow(),
   updatedAt:     timestamp("updated_at").notNull().defaultNow(),
@@ -94,6 +95,7 @@ export const insertProductSchema = z.object({
   images:        z.array(z.string()).optional(),
   variants:      z.array(productVariantSchema).optional(),
   inStock:       z.boolean().optional(),
+  soldOut:       z.boolean().optional(),
   season:        z.enum(["summer", "winter"]).nullable().optional(),
 });
 

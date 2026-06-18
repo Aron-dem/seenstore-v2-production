@@ -95,6 +95,20 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    
+    if (!product.inStock || (product as any).soldOut) {
+      toast.error(isRTL ? "المنتج غير متوفر حالياً" : "Product currently unavailable", {
+        description: isRTL 
+          ? "هذا المنتج غير متوفر حالياً، يمكنك التواصل مع الدعم للاستفسار." 
+          : "This product is not available right now. You can contact support for inquiries.",
+        action: {
+          label: isRTL ? "تواصل معنا" : "Contact Us",
+          onClick: () => window.location.assign("/contact")
+        }
+      });
+      return;
+    }
+
     const img = product.images[selectedImg] ?? PLACEHOLDER;
     const name = isRTL && product.nameAr ? product.nameAr : product.name;
     addToCart({
@@ -269,16 +283,15 @@ export default function ProductDetailPage() {
             </div>
             <button
               onClick={handleAddToCart}
-              disabled={!product.inStock}
               className={`flex-1 py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${
-                !product.inStock
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                (!product.inStock || (product as any).soldOut)
+                  ? "bg-gray-200 text-gray-500"
                   : added
                   ? "bg-green-600 text-white scale-[1.02]"
                   : "bg-black text-white hover:bg-[#E63946] active:scale-[0.98]"
               }`}>
-              {!product.inStock ? (
-                <>{isRTL ? "نفذ من المخزون" : "Out of Stock"}</>
+              {(!product.inStock || (product as any).soldOut) ? (
+                <>{isRTL ? "غير متوفر" : "Unavailable"}</>
               ) : added ? (
                 <><Check className="w-5 h-5" /> {isRTL ? "تمت الإضافة!" : "Added!"}</>
               ) : (

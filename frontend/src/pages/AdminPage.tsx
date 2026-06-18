@@ -40,7 +40,7 @@ type Product = {
   category: string; badge: string | null;
   sizes: string[]; colors: string[]; images: string[];
   variants?: ColorVariant[];
-  inStock: boolean; season: string | null; createdAt: string;
+  inStock: boolean; soldOut: boolean; season: string | null; createdAt: string;
 };
 
 type ProductVariantForm = {
@@ -54,14 +54,14 @@ type ProductForm = {
   category: string; badge: string;
   sizes: string[]; colors: string; images: string[];
   variants: ProductVariantForm[];
-  description: string; descriptionAr: string; inStock: boolean;
+  description: string; descriptionAr: string; inStock: boolean; soldOut: boolean;
   season: "" | "summer" | "winter";
 };
 
 const INIT_FORM: ProductForm = {
   name: "", nameAr: "", price: "", originalPrice: "",
   category: "T-Shirts", badge: "", sizes: [], colors: "",
-  images: [], variants: [], description: "", descriptionAr: "", inStock: true,
+  images: [], variants: [], description: "", descriptionAr: "", inStock: true, soldOut: false,
   season: "",
 };
 
@@ -567,14 +567,22 @@ function ProductModal({ product, onClose, onSaved }: {
             </div>
           </div>
 
-          {/* In Stock */}
-          <div>
+          {/* Status Switches */}
+          <div className="flex gap-6">
             <label className="flex items-center gap-3 cursor-pointer">
               <div className={`w-12 h-6 rounded-full transition-colors relative ${form.inStock ? "bg-black" : "bg-gray-300"}`}
                 onClick={() => set("inStock", !form.inStock)}>
                 <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.inStock ? "left-7" : "left-1"}`} />
               </div>
-              <span className="text-sm font-semibold">{form.inStock ? "In Stock" : "Out of Stock"}</span>
+              <span className="text-sm font-semibold">{form.inStock ? "In Stock" : "No Stock"}</span>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div className={`w-12 h-6 rounded-full transition-colors relative ${form.soldOut ? "bg-[#E63946]" : "bg-gray-300"}`}
+                onClick={() => set("soldOut", !form.soldOut)}>
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.soldOut ? "left-7" : "left-1"}`} />
+              </div>
+              <span className="text-sm font-semibold">{form.soldOut ? "Sold Out" : "Available"}</span>
             </label>
           </div>
 
@@ -1038,9 +1046,16 @@ export default function AdminPage() {
                             </td>
                             <td className="px-4 py-3 text-gray-500 text-xs">{p.sizes.slice(0, 3).join(", ")}{p.sizes.length > 3 ? "..." : ""}</td>
                             <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${p.inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
-                                {p.inStock ? "In Stock" : "Out"}
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-center ${p.inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
+                                  {p.inStock ? "In Stock" : "No Stock"}
+                                </span>
+                                {p.soldOut && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-center bg-orange-100 text-orange-700">
+                                    Sold Out
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex gap-1">

@@ -80,6 +80,29 @@ export default function CustomDesignPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSubmitting(true);
     try {
+      let finalDesignUrl = designPreview;
+
+      // If we have a local file, upload it first to get a permanent URL
+      if (designFile) {
+        const formData = new FormData();
+        formData.append("image", designFile);
+        
+        // We use the admin upload endpoint but it might need auth
+        // Since custom orders can be guest, we should ideally have a public upload for custom designs
+        // or handle it in the custom order endpoint.
+        // For now, let's try to use the existing logic if possible or assume the backend handles it.
+        // Based on the current architecture, the best way is to send the file to a permanent storage.
+        
+        try {
+          const { api } = await import("../lib/apiClient");
+          // Use the public custom-orders upload endpoint
+          const uploadRes = await api.post<{ url: string }>("/custom-orders/upload", formData);
+          finalDesignUrl = uploadRes.url;
+        } catch (uploadErr) {
+          console.error("Design upload failed, falling back to preview URL:", uploadErr);
+        }
+      }
+
       const name  = currentUser?.name  ?? guestName;
       const phone = currentUser?.phone ?? guestPhone;
       const email = currentUser?.email ?? undefined;
@@ -90,7 +113,7 @@ export default function CustomDesignPage() {
         itemType,
         size,
         color,
-        designUrl: designPreview,
+        designUrl: finalDesignUrl,
         details,
       });
       setOrderId(id);

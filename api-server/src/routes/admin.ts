@@ -177,6 +177,7 @@ const productSchema = z.object({
   images:        z.array(z.string()).default([]),
   variants:      z.array(productVariantSchema).default([]),
   inStock:       z.boolean().default(true),
+  soldOut:       z.boolean().default(false),
   season:        z.enum(["summer", "winter"]).nullable().optional(),
 });
 
