@@ -2,6 +2,9 @@ import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { eq, desc, count, sql, asc } from "drizzle-orm";
 import multer from "multer";
+import { writeFile, mkdir } from "node:fs/promises";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { db } from "@workspace/db";
 import { usersTable, ordersTable, customOrdersTable, productsTable, couponsTable } from "@workspace/db/schema";
 import { requireAdmin } from "../middlewares/auth.js";
@@ -9,80 +12,19 @@ import { requireAdmin } from "../middlewares/auth.js";
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
-// ── Derive Supabase HTTP URL ───────────────────────────────────────────────────
-// Priority: decode project ref from JWT key → fall back to SUPABASE_URL parsing
-function getSupabaseHttpUrl(rawUrl?: string, jwtKey?: string): string | null {
-  // 1. Try to decode the ref from the JWT service role key (most reliable)
-  if (jwtKey) {
-    try {
-      const payload = jwtKey.split(".")[1];
-      const padded  = payload + "=".repeat((4 - payload.length % 4) % 4);
-      const decoded = JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
-      if (decoded.ref) return `https://${decoded.ref}.supabase.co`;
-    } catch { /* ignore */ }
-  }
-  // 2. Fall back to parsing SUPABASE_URL
-  if (!rawUrl) return null;
-  if (rawUrl.startsWith("http")) return rawUrl;
-  const m = rawUrl.match(/db\.([a-z0-9]+)\.supabase\.co/);
-  return m ? `https://${m[1]}.supabase.co` : null;
-}
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PUBLIC_IMAGES_DIR = join(__dirname, "..", "public", "images");
 
-// ─── Image Storage helper (Supabase primary · Replit fallback) ────────────────
-async function uploadToStorage(buffer: Buffer, originalname: string, mimetype: string): Promise<string> {
-  const ext        = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "");
-  const objectName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+// ─── Image Storage: save to local disk, serve via /api/images/ ───────────────
+async function uploadToStorage(buffer: Buffer, originalname: string, _mimetype: string): Promise<string> {
+  const ext      = (originalname.split(".").pop() ?? "jpg").replace(/[^a-z0-9]/gi, "").toLowerCase();
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const destDir  = PUBLIC_IMAGES_DIR;
 
-  // ── 1. Supabase Storage (derives URL from JWT key ref) ────────────────────
-  const rawSupabaseUrl = process.env["SUPABASE_URL"];
-  const supabaseKey    = process.env["SUPABASE_SERVICE_ROLE_KEY"];
-  const supabaseUrl    = getSupabaseHttpUrl(rawSupabaseUrl, supabaseKey);
+  await mkdir(destDir, { recursive: true });
+  await writeFile(join(destDir, filename), buffer);
 
-  if (supabaseUrl && supabaseKey) {
-    const { createClient } = await import("@supabase/supabase-js");
-    const ws = (await import("ws")).default;
-    const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false }, realtime: { transport: ws } } as any);
-
-    const { data: buckets } = await supabase.storage.listBuckets();
-    if (!buckets?.some(b => b.name === "product-images")) {
-      await supabase.storage.createBucket("product-images", { public: true });
-    }
-
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(objectName, buffer, { contentType: mimetype, upsert: false });
-    if (error) throw new Error(`Supabase upload failed: ${error.message}`);
-
-    const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(objectName);
-    return publicUrl;
-  }
-
-  // ── 2. Replit Object Storage fallback ─────────────────────────────────────
-  const REPLIT_SIDECAR = "http://127.0.0.1:1106";
-  const bucketId       = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
-  if (!bucketId) throw new Error("Storage not configured: set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY or DEFAULT_OBJECT_STORAGE_BUCKET_ID");
-
-  const fullName = `product-images/${objectName}`;
-  const signRes  = await fetch(`${REPLIT_SIDECAR}/object-storage/signed-object-url`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({
-      bucket_name: bucketId,
-      object_name: fullName,
-      method:      "PUT",
-      expires_at:  new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-    }),
-  });
-  if (!signRes.ok) throw new Error(`Failed to get upload URL: ${await signRes.text()}`);
-  const { signed_url: signedUrl } = await signRes.json() as { signed_url: string };
-
-  const uploadRes = await fetch(signedUrl, {
-    method:  "PUT",
-    headers: { "Content-Type": mimetype },
-    body:    buffer,
-  });
-  if (!uploadRes.ok) throw new Error(`Upload failed: ${await uploadRes.text()}`);
-  return `https://storage.googleapis.com/${bucketId}/${fullName}`;
+  return `/api/images/${filename}`;
 }
 
 // helper: extract a single string from req.params value (Express 5 types allow string | string[])
