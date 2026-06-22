@@ -751,7 +751,8 @@ export default function AdminPage() {
   const [couponFormOpen, setCouponFormOpen] = useState(false);
   const [couponSaving,  setCouponSaving] = useState(false);
   const [couponError,   setCouponError]  = useState("");
-
+  const [migrating,     setMigrating]    = useState(false);
+  const [migrateLog,    setMigrateLog]   = useState<string[]>([]);
 
   const limit = 15;
 
@@ -863,6 +864,55 @@ export default function AdminPage() {
     await api.delete(`/admin/messages/${id}`);
     setMessages(prev => prev.filter(m => m.id !== id));
     if (activeMsg?.id === id) setActiveMsg(null);
+  };
+
+  const migrateImagesToSupabase = async () => {
+    const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL as string;
+    const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    const BUCKET = "product-images";
+    if (!SUPABASE_URL || !SUPABASE_ANON) { setError("VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set"); return; }
+    if (!confirm("This will upload all local product images to Supabase Storage and update DB URLs. Continue?")) return;
+    setMigrating(true); setMigrateLog([]); setError("");
+    const log = (msg: string) => setMigrateLog(prev => [...prev, msg]);
+    try {
+      const { products: allProducts } = await api.get<{ products: Product[] }>("/admin/products?limit=200");
+      const toMigrate = allProducts.filter(p =>
+        p.images.some(img => img.startsWith("/api/images/")) ||
+        (p.variants ?? []).some((v: any) => (v.images ?? []).some((img: string) => img.startsWith("/api/images/")))
+      );
+      log(`Found ${toMigrate.length} products with local images`);
+      for (const p of toMigrate) {
+        log(`Migrating: ${p.name}...`);
+        const urlMap = new Map<string, string>();
+        const localUrls = new Set<string>([
+          ...p.images.filter(img => img.startsWith("/api/images/")),
+          ...(p.variants ?? []).flatMap((v: any) => (v.images ?? []).filter((img: string) => img.startsWith("/api/images/"))),
+        ]);
+        for (const localUrl of localUrls) {
+          try {
+            const blob = await fetch(localUrl).then(r => r.blob());
+            const ext = localUrl.split(".").pop()?.toLowerCase() ?? "jpg";
+            const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+            const path = `products/${filename}`;
+            const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": `image/${ext}`, "x-upsert": "true" },
+              body: blob,
+            });
+            if (!res.ok) throw new Error(await res.text());
+            urlMap.set(localUrl, `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`);
+          } catch (e: any) { log(`  ✗ Failed ${localUrl}: ${e.message}`); }
+        }
+        if (urlMap.size === 0) { log(`  ✗ No images migrated for ${p.name}`); continue; }
+        const newImages   = p.images.map(img => urlMap.get(img) ?? img);
+        const newVariants = (p.variants ?? []).map((v: any) => ({ ...v, images: (v.images ?? []).map((img: string) => urlMap.get(img) ?? img) }));
+        await api.patch(`/admin/products/${p.id}`, { images: newImages, variants: newVariants });
+        log(`  ✓ ${p.name} — ${urlMap.size} image(s) migrated`);
+      }
+      log("Migration complete! Refreshing...");
+      await fetchProducts();
+    } catch (e: any) { log(`Error: ${e.message}`); setError(e.message); }
+    finally { setMigrating(false); }
   };
 
   useEffect(() => { if (isAdmin) fetchStats(); }, [isAdmin, fetchStats]);
@@ -1003,12 +1053,23 @@ export default function AdminPage() {
                   <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                     <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                   </button>
+                  <button onClick={migrateImagesToSupabase} disabled={migrating}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-700 text-white rounded-xl text-sm font-bold hover:bg-zinc-600 transition-colors disabled:opacity-50">
+                    {migrating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    {migrating ? "Migrating..." : "Migrate to Supabase"}
+                  </button>
                   <button onClick={() => setEditProduct(null)}
                     className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-[#E63946] transition-colors">
                     <Plus className="w-4 h-4" /> Add Product
                   </button>
                 </div>
               </div>
+
+              {migrateLog.length > 0 && (
+                <div className="mb-4 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-xs font-mono text-gray-300 max-h-40 overflow-y-auto">
+                  {migrateLog.map((line, i) => <div key={i}>{line}</div>)}
+                </div>
+              )}
 
               {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
 
