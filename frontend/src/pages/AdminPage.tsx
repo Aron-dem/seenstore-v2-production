@@ -433,19 +433,34 @@ function ProductModal({ product, onClose, onSaved }: {
     if (!files.length) return;
     setUploading(true); setError("");
     try {
-      const token = localStorage.getItem("seen_access_token");
+      const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL as string;
+      const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      const BUCKET = "product-images";
+
       const uploads = Array.from(files).map(async (file) => {
-        const fd = new FormData();
-        fd.append("image", file);
-        const res = await fetch("/api/admin/upload/image", {
-          method: "POST",
-          headers: token ? { "Authorization": `Bearer ${token}` } : {},
-          body: fd,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Upload failed");
-        return data.url as string;
+        const ext      = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const path     = `products/${filename}`;
+
+        const res = await fetch(
+          `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`,
+          {
+            method:  "POST",
+            headers: {
+              "Authorization": `Bearer ${SUPABASE_ANON}`,
+              "Content-Type":  file.type || "image/jpeg",
+              "x-upsert":      "true",
+            },
+            body: file,
+          }
+        );
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(`Upload failed: ${txt}`);
+        }
+        return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
       });
+
       const urls = await Promise.all(uploads);
       syncVariants(form.colors, [...form.images, ...urls]);
     } catch (e: any) { setError(e.message); }
