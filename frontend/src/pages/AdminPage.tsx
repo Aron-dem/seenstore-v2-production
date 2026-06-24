@@ -163,6 +163,82 @@ const CALL_STATUS: Record<string, { label: string; color: string }> = {
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 type Tab = "dashboard" | "products" | "orders" | "custom-orders" | "users" | "messages" | "coupons";
 
+// ─── Color Detection ──────────────────────────────────────────────────────────
+const NAMED_COLORS = [
+  { name: "Black",        hex: "#0A0A0A", r:  10, g:  10, b:  10 },
+  { name: "Charcoal",     hex: "#36454F", r:  54, g:  69, b:  79 },
+  { name: "Dark Gray",    hex: "#424242", r:  66, g:  66, b:  66 },
+  { name: "Gray",         hex: "#9E9E9E", r: 158, g: 158, b: 158 },
+  { name: "Light Gray",   hex: "#BDBDBD", r: 189, g: 189, b: 189 },
+  { name: "Dark Brown",   hex: "#3D2314", r:  61, g:  35, b:  20 },
+  { name: "Brown",        hex: "#795548", r: 121, g:  85, b:  72 },
+  { name: "Camel",        hex: "#C19A6B", r: 193, g: 154, b: 107 },
+  { name: "Tan",          hex: "#D2B48C", r: 210, g: 180, b: 140 },
+  { name: "Beige",        hex: "#D7C9A7", r: 215, g: 201, b: 167 },
+  { name: "Off White",    hex: "#F5F0E8", r: 245, g: 240, b: 232 },
+  { name: "White",        hex: "#FFFFFF", r: 255, g: 255, b: 255 },
+  { name: "Cream",        hex: "#FFFDD0", r: 255, g: 253, b: 208 },
+  { name: "Burgundy",     hex: "#800020", r: 128, g:   0, b:  32 },
+  { name: "Maroon",       hex: "#6B1F2F", r: 107, g:  31, b:  47 },
+  { name: "Red",          hex: "#C62828", r: 198, g:  40, b:  40 },
+  { name: "Orange",       hex: "#E64A19", r: 230, g:  74, b:  25 },
+  { name: "Mustard",      hex: "#C8960C", r: 200, g: 150, b:  12 },
+  { name: "Yellow",       hex: "#F9A825", r: 249, g: 168, b:  37 },
+  { name: "Olive",        hex: "#6D6C31", r: 109, g: 108, b:  49 },
+  { name: "Forest Green", hex: "#2E5825", r:  46, g:  88, b:  37 },
+  { name: "Green",        hex: "#388E3C", r:  56, g: 142, b:  60 },
+  { name: "Mint",         hex: "#A8D5BA", r: 168, g: 213, b: 186 },
+  { name: "Navy",         hex: "#1A237E", r:  26, g:  35, b: 126 },
+  { name: "Blue",         hex: "#1565C0", r:  21, g: 101, b: 192 },
+  { name: "Light Blue",   hex: "#4FC3F7", r:  79, g: 195, b: 247 },
+  { name: "Purple",       hex: "#6A1B9A", r: 106, g:  27, b: 154 },
+  { name: "Lavender",     hex: "#9575CD", r: 149, g: 117, b: 205 },
+  { name: "Pink",         hex: "#E91E63", r: 233, g:  30, b:  99 },
+  { name: "Light Pink",   hex: "#F8BBD0", r: 248, g: 187, b: 208 },
+] as const;
+
+function rgbToColorName(r: number, g: number, b: number): { name: string; hex: string } {
+  let best = NAMED_COLORS[0];
+  let bestDist = Infinity;
+  for (const c of NAMED_COLORS) {
+    const d = Math.sqrt((r - c.r) ** 2 + (g - c.g) ** 2 + (b - c.b) ** 2);
+    if (d < bestDist) { bestDist = d; best = c; }
+  }
+  const detectedHex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  return { name: best.name, hex: detectedHex };
+}
+
+function detectImageColor(url: string): Promise<{ name: string; hex: string }> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const SIZE = 120;
+        const canvas = document.createElement("canvas");
+        canvas.width = SIZE; canvas.height = SIZE;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, SIZE, SIZE);
+        const data = ctx.getImageData(0, 0, SIZE, SIZE).data;
+        let tR = 0, tG = 0, tB = 0, count = 0;
+        const y0 = Math.round(SIZE * 0.2), y1 = Math.round(SIZE * 0.8);
+        const x0 = Math.round(SIZE * 0.2), x1 = Math.round(SIZE * 0.8);
+        for (let y = y0; y < y1; y++) {
+          for (let x = x0; x < x1; x++) {
+            const i = (y * SIZE + x) * 4;
+            const r = data[i]!, g = data[i + 1]!, b = data[i + 2]!;
+            if (r > 235 && g > 235 && b > 235) continue; // skip white/light bg
+            tR += r; tG += g; tB += b; count++;
+          }
+        }
+        if (count === 0) { resolve({ name: "Black", hex: "#0A0A0A" }); return; }
+        resolve(rgbToColorName(Math.round(tR / count), Math.round(tG / count), Math.round(tB / count)));
+      } catch { resolve({ name: "Black", hex: "#0A0A0A" }); }
+    };
+    img.onerror = () => resolve({ name: "Black", hex: "#0A0A0A" });
+    img.src = url;
+  });
+}
+
 // ─── Custom Order Modal ───────────────────────────────────────────────────────
 function OrderModal({ order, onClose, isRTL, onUpdate }: {
   order: CustomOrder; onClose: () => void; isRTL: boolean;
@@ -433,36 +509,51 @@ function ProductModal({ product, onClose, onSaved }: {
     if (!files.length) return;
     setUploading(true); setError("");
     try {
-      const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL as string;
-      const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      const BUCKET = "product-images";
+      // 1. Upload all files to server
+      const uploadedUrls = await Promise.all(
+        Array.from(files).map(async (file) => {
+          const fd = new FormData();
+          fd.append("image", file);
+          const res = await fetch("/api/admin/upload/image", { method: "POST", body: fd, credentials: "include" });
+          if (!res.ok) { const txt = await res.text(); throw new Error(`Upload failed: ${txt}`); }
+          return (await res.json() as { url: string }).url;
+        })
+      );
 
-      const uploads = Array.from(files).map(async (file) => {
-        const ext      = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-        const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const path     = `products/${filename}`;
+      // 2. Detect dominant color for each uploaded image
+      const detectedColors = await Promise.all(uploadedUrls.map(detectImageColor));
 
-        const res = await fetch(
-          `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`,
-          {
-            method:  "POST",
-            headers: {
-              "Authorization": `Bearer ${SUPABASE_ANON}`,
-              "Content-Type":  file.type || "image/jpeg",
-              "x-upsert":      "true",
-            },
-            body: file,
+      // 3. Merge detected color names into existing colors (no duplicates)
+      setForm(prev => {
+        const existingColors = splitColorInput(prev.colors);
+        const allColorNames = [...existingColors];
+        detectedColors.forEach(({ name }) => {
+          if (!allColorNames.some(c => normalizeColorName(c) === normalizeColorName(name)))
+            allColorNames.push(name);
+        });
+        const newColorsStr = allColorNames.join(", ");
+        const newImages = [...prev.images, ...uploadedUrls];
+
+        // Build variant forms from scratch with new colors + images
+        const existingVariantData = prev.variants.map(v => ({
+          color: v.color, hex: v.hex,
+          images: v.imagesText.split("\n").map(s => s.trim()).filter(Boolean),
+        }));
+        const newVariants = toVariantForms(newColorsStr, newImages, existingVariantData);
+
+        // Inject detected hex + assign uploaded image to its variant
+        uploadedUrls.forEach((url, i) => {
+          const { name, hex } = detectedColors[i]!;
+          const vIdx = newVariants.findIndex(v => normalizeColorName(v.color) === normalizeColorName(name));
+          if (vIdx !== -1) {
+            if (!newVariants[vIdx]!.hex) newVariants[vIdx]!.hex = hex;
+            const imgs = newVariants[vIdx]!.imagesText.split("\n").map(s => s.trim()).filter(Boolean);
+            if (!imgs.includes(url)) newVariants[vIdx]!.imagesText = [...imgs, url].join("\n");
           }
-        );
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(`Upload failed: ${txt}`);
-        }
-        return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
-      });
+        });
 
-      const urls = await Promise.all(uploads);
-      syncVariants(form.colors, [...form.images, ...urls]);
+        return { ...prev, colors: newColorsStr, images: newImages, variants: newVariants };
+      });
     } catch (e: any) { setError(e.message); }
     finally { setUploading(false); }
   };
@@ -751,8 +842,6 @@ export default function AdminPage() {
   const [couponFormOpen, setCouponFormOpen] = useState(false);
   const [couponSaving,  setCouponSaving] = useState(false);
   const [couponError,   setCouponError]  = useState("");
-  const [migrating,     setMigrating]    = useState(false);
-  const [migrateLog,    setMigrateLog]   = useState<string[]>([]);
 
   const limit = 15;
 
@@ -866,62 +955,6 @@ export default function AdminPage() {
     if (activeMsg?.id === id) setActiveMsg(null);
   };
 
-  const migrateImagesToSupabase = async () => {
-    const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL as string;
-    const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-    const BUCKET = "product-images";
-    if (!SUPABASE_URL || !SUPABASE_ANON) { setError("VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set"); return; }
-    if (!confirm("This will upload all local product images to Supabase Storage and update DB URLs. Continue?")) return;
-    setMigrating(true); setMigrateLog([]); setError("");
-    const log = (msg: string) => setMigrateLog(prev => [...prev, msg]);
-    try {
-      const { products: allProducts } = await api.get<{ products: Product[] }>("/admin/products?limit=200");
-      const toMigrate = allProducts.filter(p =>
-        p.images.some(img => img.startsWith("/api/images/")) ||
-        (p.variants ?? []).some((v: any) => (v.images ?? []).some((img: string) => img.startsWith("/api/images/")))
-      );
-      log(`Found ${toMigrate.length} products with local images`);
-      for (const p of toMigrate) {
-        log(`Migrating: ${p.name}...`);
-        const urlMap = new Map<string, string>();
-        const localUrls = new Set<string>([
-          ...p.images.filter(img => img.startsWith("/api/images/")),
-          ...(p.variants ?? []).flatMap((v: any) => (v.images ?? []).filter((img: string) => img.startsWith("/api/images/"))),
-        ]);
-        for (const localUrl of localUrls) {
-          try {
-            const imgRes = await fetch(localUrl);
-            if (!imgRes.ok) throw new Error(`Fetch local image failed: ${imgRes.status}`);
-            const blob = await imgRes.blob();
-            const rawExt = localUrl.split(".").pop()?.toLowerCase() ?? "jpg";
-            const mimeMap: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
-            const mimeType = mimeMap[rawExt] ?? "image/jpeg";
-            const ext = rawExt === "jpg" ? "jpg" : rawExt;
-            const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-            const path = `products/${filename}`;
-            log(`  Uploading ${localUrl.split("/").pop()} (${mimeType})...`);
-            const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
-              method: "POST",
-              headers: { "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": mimeType, "x-upsert": "true" },
-              body: blob,
-            });
-            const resText = await res.text();
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${resText}`);
-            urlMap.set(localUrl, `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`);
-            log(`  ✓ Uploaded`);
-          } catch (e: any) { log(`  ✗ ${e.message}`); }
-        }
-        if (urlMap.size === 0) { log(`  ✗ No images migrated for ${p.name}`); continue; }
-        const newImages   = p.images.map(img => urlMap.get(img) ?? img);
-        const newVariants = (p.variants ?? []).map((v: any) => ({ ...v, images: (v.images ?? []).map((img: string) => urlMap.get(img) ?? img) }));
-        await api.patch(`/admin/products/${p.id}`, { images: newImages, variants: newVariants });
-        log(`  ✓ ${p.name} — ${urlMap.size} image(s) migrated`);
-      }
-      log("Migration complete! Refreshing...");
-      await fetchProducts();
-    } catch (e: any) { log(`Error: ${e.message}`); setError(e.message); }
-    finally { setMigrating(false); }
-  };
 
   useEffect(() => { if (isAdmin) fetchStats(); }, [isAdmin, fetchStats]);
 
@@ -1061,23 +1094,12 @@ export default function AdminPage() {
                   <button onClick={fetchProducts} className="p-2 rounded-lg hover:bg-zinc-700 transition-colors">
                     <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                   </button>
-                  <button onClick={migrateImagesToSupabase} disabled={migrating}
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-700 text-white rounded-xl text-sm font-bold hover:bg-zinc-600 transition-colors disabled:opacity-50">
-                    {migrating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    {migrating ? "Migrating..." : "Migrate to Supabase"}
-                  </button>
                   <button onClick={() => setEditProduct(null)}
                     className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-[#E63946] transition-colors">
                     <Plus className="w-4 h-4" /> Add Product
                   </button>
                 </div>
               </div>
-
-              {migrateLog.length > 0 && (
-                <div className="mb-4 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-xs font-mono text-gray-300 max-h-40 overflow-y-auto">
-                  {migrateLog.map((line, i) => <div key={i}>{line}</div>)}
-                </div>
-              )}
 
               {error && <p className="text-red-400 bg-red-900/30 rounded-xl p-4 mb-4 text-sm">{error}</p>}
 
