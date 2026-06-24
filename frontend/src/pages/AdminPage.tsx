@@ -890,18 +890,26 @@ export default function AdminPage() {
         ]);
         for (const localUrl of localUrls) {
           try {
-            const blob = await fetch(localUrl).then(r => r.blob());
-            const ext = localUrl.split(".").pop()?.toLowerCase() ?? "jpg";
+            const imgRes = await fetch(localUrl);
+            if (!imgRes.ok) throw new Error(`Fetch local image failed: ${imgRes.status}`);
+            const blob = await imgRes.blob();
+            const rawExt = localUrl.split(".").pop()?.toLowerCase() ?? "jpg";
+            const mimeMap: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
+            const mimeType = mimeMap[rawExt] ?? "image/jpeg";
+            const ext = rawExt === "jpg" ? "jpg" : rawExt;
             const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
             const path = `products/${filename}`;
+            log(`  Uploading ${localUrl.split("/").pop()} (${mimeType})...`);
             const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
               method: "POST",
-              headers: { "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": `image/${ext}`, "x-upsert": "true" },
+              headers: { "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": mimeType, "x-upsert": "true" },
               body: blob,
             });
-            if (!res.ok) throw new Error(await res.text());
+            const resText = await res.text();
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${resText}`);
             urlMap.set(localUrl, `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`);
-          } catch (e: any) { log(`  ✗ Failed ${localUrl}: ${e.message}`); }
+            log(`  ✓ Uploaded`);
+          } catch (e: any) { log(`  ✗ ${e.message}`); }
         }
         if (urlMap.size === 0) { log(`  ✗ No images migrated for ${p.name}`); continue; }
         const newImages   = p.images.map(img => urlMap.get(img) ?? img);
