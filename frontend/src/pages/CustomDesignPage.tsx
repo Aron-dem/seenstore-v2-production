@@ -18,7 +18,7 @@ const ITEM_TYPES = [
   { value: "Cargo Pants", label: "Cargo Pants", labelAr: "كارجو بانت" },
 ];
 
-const COLORS = ["Black", "White", "Grey", "Navy", "Red", "Olive", "Beige", "Khaki", "Blue"];
+const COLORS = ["Black", "White", "Burgundy", "Grey", "Dark Brown"];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function CustomDesignPage() {
