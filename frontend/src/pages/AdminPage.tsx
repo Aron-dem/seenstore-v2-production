@@ -509,51 +509,50 @@ function ProductModal({ product, onClose, onSaved }: {
     if (!files.length) return;
     setUploading(true); setError("");
     try {
-      // 1. Upload all files to server
-      const uploadedUrls = await Promise.all(
-        Array.from(files).map(async (file) => {
-          const fd = new FormData();
-          fd.append("image", file);
-          const res = await fetch("/api/admin/upload/image", { method: "POST", body: fd, credentials: "include" });
-          if (!res.ok) { const txt = await res.text(); throw new Error(`Upload failed: ${txt}`); }
-          return (await res.json() as { url: string }).url;
-        })
-      );
+      const uploadedUrls: string[] = [];
+      for (const file of Array.from(files)) {
+        const fd = new FormData();
+        fd.append("image", file);
+        const res = await fetch("/api/admin/upload/image", { method: "POST", body: fd, credentials: "include" });
+        if (!res.ok) { const txt = await res.text(); throw new Error(`Upload failed: ${txt}`); }
+        const { url } = await res.json() as { url: string };
+        uploadedUrls.push(url);
+      }
 
-      // 2. Detect dominant color for each uploaded image
-      const detectedColors = await Promise.all(uploadedUrls.map(detectImageColor));
-
-      // 3. Merge detected color names into existing colors (no duplicates)
+      // Append images immediately without complex color detection to avoid race conditions
       setForm(prev => {
-        const existingColors = splitColorInput(prev.colors);
-        const allColorNames = [...existingColors];
-        detectedColors.forEach(({ name }) => {
-          if (!allColorNames.some(c => normalizeColorName(c) === normalizeColorName(name)))
-            allColorNames.push(name);
-        });
-        const newColorsStr = allColorNames.join(", ");
         const newImages = [...prev.images, ...uploadedUrls];
-
-        // Build variant forms from scratch with new colors + images
+        const existingColors = splitColorInput(prev.colors);
         const existingVariantData = prev.variants.map(v => ({
           color: v.color, hex: v.hex,
           images: v.imagesText.split("\n").map(s => s.trim()).filter(Boolean),
         }));
-        const newVariants = toVariantForms(newColorsStr, newImages, existingVariantData);
-
-        // Inject detected hex + assign uploaded image to its variant
-        uploadedUrls.forEach((url, i) => {
-          const { name, hex } = detectedColors[i]!;
-          const vIdx = newVariants.findIndex(v => normalizeColorName(v.color) === normalizeColorName(name));
-          if (vIdx !== -1) {
-            if (!newVariants[vIdx]!.hex) newVariants[vIdx]!.hex = hex;
-            const imgs = newVariants[vIdx]!.imagesText.split("\n").map(s => s.trim()).filter(Boolean);
-            if (!imgs.includes(url)) newVariants[vIdx]!.imagesText = [...imgs, url].join("\n");
-          }
-        });
-
-        return { ...prev, colors: newColorsStr, images: newImages, variants: newVariants };
+        const newVariants = toVariantForms(prev.colors, newImages, existingVariantData);
+        return { ...prev, images: newImages, variants: newVariants };
       });
+
+      // Optional: detect color in background for the first image only
+      if (uploadedUrls[0]) {
+        detectImageColor(uploadedUrls[0]).then(({ name, hex }) => {
+          setForm(prev => {
+            const existingColors = splitColorInput(prev.colors);
+            if (!existingColors.some(c => normalizeColorName(c) === normalizeColorName(name))) {
+              const newColorsStr = prev.colors ? `${prev.colors}, ${name}` : name;
+              const existingVariantData = prev.variants.map(v => ({
+                color: v.color, hex: v.hex,
+                images: v.imagesText.split("\n").map(s => s.trim()).filter(Boolean),
+              }));
+              const newVariants = toVariantForms(newColorsStr, prev.images, existingVariantData);
+              const vIdx = newVariants.findIndex(v => normalizeColorName(v.color) === normalizeColorName(name));
+              if (vIdx !== -1 && !newVariants[vIdx]!.hex) {
+                newVariants[vIdx]!.hex = hex;
+              }
+              return { ...prev, colors: newColorsStr, variants: newVariants };
+            }
+            return prev;
+          });
+        }).catch(() => {});
+      }
     } catch (e: any) { setError(e.message); }
     finally { setUploading(false); }
   };
@@ -649,6 +648,7 @@ function ProductModal({ product, onClose, onSaved }: {
                 <option value="">None</option>
                 <option value="NEW">NEW</option>
                 <option value="SALE">SALE</option>
+                <option value="SOLD OUT">SOLD OUT</option>
               </select>
             </div>
           </div>

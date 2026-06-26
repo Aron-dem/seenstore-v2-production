@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useLang } from "../context/LanguageContext";
-import { ShoppingBag, Heart, Filter, Grid, List, X, Check, Loader2 } from "lucide-react";
+import { Eye, Heart, Filter, Grid, List, X, Check, Loader2 } from "lucide-react";
 import { useSEO } from "../hooks/useSEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { deriveProductVariants, getColorHex, type ColorVariant } from "../lib/productVariants";
@@ -407,12 +407,12 @@ export default function ShopPage({ season }: ShopPageProps = {}) {
                       {view === "list" && (
                         <p className="text-gray-500 text-sm mb-4 line-clamp-2">{isRTL && p.descriptionAr ? p.descriptionAr : p.description}</p>
                       )}
-                      <button
-                        onClick={() => addToCart({ productId: p.id, name: isRTL && p.nameAr ? p.nameAr : p.name, price: p.price, image: img, size: mainSize, color: mainColor, quantity: 1 })}
+                      <Link
+                        href={`/product/${p.id}`}
                         className={`flex items-center justify-center gap-2 bg-black text-white rounded-lg font-semibold hover:bg-[#E63946] transition-colors text-sm ${view === "grid" ? "w-full py-2.5" : "px-6 py-2.5"}`}
                       >
-                        <ShoppingBag className="w-4 h-4" /> {t.product.addToCart}
-                      </button>
+                        <Eye className="w-4 h-4" /> {isRTL ? "خذ نظرة" : "Take a look"}
+                      </Link>
                     </div>
                   </motion.div>
                 );
