@@ -165,7 +165,7 @@ export default function HomePage() {
               <span className="w-6 h-px bg-[#E63946]" />
               SEENSTORE
             </p>
-            <h1 className="font-display text-[5.5rem] md:text-[8rem] lg:text-[10rem] leading-[0.9] mb-10 text-white">
+            <h1 className="font-display text-[5.5rem] md:text-[8rem] lg:text-[10rem] leading-[0.9] rtl:leading-[1.1] rtl:text-[4.5rem] md:rtl:text-[7rem] lg:rtl:text-[8.5rem] mb-10 text-white">
               {t.home.newCollection.split(" ").map((word, i) => (<span key={i}>{word}<br/></span>))}
             </h1>
             <div className="flex flex-wrap gap-4">
