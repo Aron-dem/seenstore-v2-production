@@ -75,7 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { label: t.nav.home,    href: "/",        isRouter: true  },
     { label: t.nav.shop,    href: "/shop",     isRouter: true  },
     { label: t.nav.about,   href: "/#about",   isRouter: false },
-    { label: t.nav.contact, href: "/#contact", isRouter: false },
+    { label: t.nav.contact, href: "/contact",  isRouter: true  },
   ];
 
   return (
